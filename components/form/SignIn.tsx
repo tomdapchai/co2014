@@ -102,7 +102,7 @@ const SignIn = () => {
             <CardFooter className="text-sm flex gap-2">
                 <p className="text-slate-400">Haven't had account yet?</p>
                 <Link
-                    href={"../sign-up"}
+                    href={"/sign-up"}
                     className="underline text-dark hover:text-slate-700">
                     Sign Up
                 </Link>
