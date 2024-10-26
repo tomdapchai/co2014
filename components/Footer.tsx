@@ -8,7 +8,9 @@ const Footer = () => {
         <div className="flex bg-slate-500 bg-opacity-10 items-center justify-center w-full ">
             <div className="flex justify-between items-center max-md:flex-col w-[70%] px-5 py-5 ">
                 <div className="flex justify-between items-center md:gap-2 max-md:flex-col">
-                    <h3 className="font-bold">LAMBO</h3>
+                    <Link href="/">
+                        <h3 className="font-bold">LAMBO</h3>
+                    </Link>
                     <div className="flex w-fit justify-between items-center max-md:flex-col">
                         <Button variant="link" className="">
                             <Link href="/">Privacy</Link>
