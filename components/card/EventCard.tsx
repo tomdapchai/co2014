@@ -87,25 +87,29 @@ const EventCard = ({
                         </CardContent>
                         {isHost ? (
                             <CardFooter>
-                                <div className="flex flex-col justify-between items-start gap-2">
-                                    <Link href={`/event/${id}`}>
-                                        <Button
-                                            className="px-0 font-bold"
-                                            variant="link">
-                                            Manage event
-                                        </Button>
-                                    </Link>
-                                </div>
+                                <Link href={`/event/${id}`}>
+                                    <Button
+                                        className="px-0 font-bold"
+                                        variant="link">
+                                        Manage event
+                                    </Button>
+                                </Link>
                             </CardFooter>
                         ) : (
-                            <CardFooter className="flex gap-2">
-                                <Image
-                                    src={byUser.avatar}
-                                    alt={byUser.name}
-                                    width={20}
-                                    height={20}
-                                />
-                                <p>By {byUser.name}</p>
+                            <CardFooter>
+                                <Link
+                                    href={`/user/${byUser.id}`}
+                                    className="flex gap-2 mt-2">
+                                    <Image
+                                        src={byUser.avatar}
+                                        alt={byUser.name}
+                                        width={20}
+                                        height={20}
+                                    />
+                                    <p className="font-bold text-sm">
+                                        By {byUser.name}
+                                    </p>
+                                </Link>
                             </CardFooter>
                         )}
                     </div>
