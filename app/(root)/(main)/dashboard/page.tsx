@@ -59,8 +59,8 @@ const Page = () => {
                 id: "4",
                 title: "Event 4",
                 logo: "/assets/eventLogo.png",
-                start: new Date("2024-11-01T10:00:00"),
-                end: new Date("2024-11-03T12:00:00"),
+                start: new Date("2025-11-01T10:00:00"),
+                end: new Date("2025-11-03T12:00:00"),
                 location: "Da Lat City",
                 attendees: 400,
                 byUser: {
@@ -123,6 +123,11 @@ const Page = () => {
                 ? event.start > now
                 : event.end < now;
         });
+        filtered.sort((a, b) =>
+            eventView === "upcoming"
+                ? a.start.getTime() - b.start.getTime()
+                : b.start.getTime() - a.start.getTime()
+        );
         setFilteredEvents(filtered);
     }, [eventView, events]);
 
