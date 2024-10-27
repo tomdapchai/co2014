@@ -8,7 +8,12 @@ body {
     font-family: Arial, Helvetica, sans-serif;
     background: linear-gradient(150deg, #cabaaa 9%, #e9dcd0 43%, #d9c5b2 100%);
     height: 100vh;
-    width: 100vw;
+    min-height: 100vh;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    background-attachment: fixed;
 }
 
 @layer utilities {
