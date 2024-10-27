@@ -1,5 +1,5 @@
 // middleware.ts
-
+// use zustand for storing state - login state in this case
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
