@@ -86,6 +86,7 @@ const SignIn = () => {
                                         <Input
                                             className="no-fcous border"
                                             placeholder="Enter your password here"
+                                            type="password"
                                             {...field}
                                         />
                                     </FormControl>

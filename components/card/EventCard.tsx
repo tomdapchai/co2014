@@ -87,7 +87,7 @@ const EventCard = ({
                         </CardContent>
                         {isHost ? (
                             <CardFooter>
-                                <Link href={`/event/${id}`}>
+                                <Link href={`/manage/${id}`}>
                                     <Button
                                         className="px-0 font-bold"
                                         variant="link">

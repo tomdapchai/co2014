@@ -86,6 +86,7 @@ const SignUp = () => {
                                         <Input
                                             className="no-fcous border"
                                             placeholder="Enter your password here"
+                                            type="password"
                                             {...field}
                                         />
                                     </FormControl>
@@ -105,6 +106,7 @@ const SignUp = () => {
                                         <Input
                                             className="no-focus border"
                                             placeholder="Confirm your password here"
+                                            type="password"
                                             {...field}
                                         />
                                     </FormControl>
