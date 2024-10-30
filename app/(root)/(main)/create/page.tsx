@@ -30,6 +30,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import InputNumber from "@/components/InputNumber";
+import { set } from "date-fns";
 
 const Page = () => {
     // mock eventId
@@ -114,7 +115,7 @@ const Page = () => {
             capacity: "unlimited",
             ticketType: "free",
             tickets: [],
-            maxTicketsPerUser: 0,
+            maxTicketsPerUser: 1,
         },
     });
 
@@ -419,11 +420,17 @@ const Page = () => {
                                         <div>
                                             <FormControl>
                                                 <div className="flex space-x-4 items-center">
-                                                    <Switch
-                                                        checked={isLimited}
-                                                        onCheckedChange={(
-                                                            e
-                                                        ) => {
+                                                    <Label>
+                                                        {isLimited
+                                                            ? "Limited"
+                                                            : "Unlimited"}
+                                                    </Label>
+                                                    <Button
+                                                        variant="ghost"
+                                                        className="p-0"
+                                                        onClick={() => {
+                                                            const e =
+                                                                !isLimited;
                                                             setIsLimited(e);
                                                             if (!e) {
                                                                 form.setValue(
@@ -431,9 +438,19 @@ const Page = () => {
                                                                     "unlimited"
                                                                 );
                                                             }
-                                                        }}
-                                                    />
-                                                    <Label>Limited</Label>
+                                                        }}>
+                                                        <Image
+                                                            src="/assets/editIcon.svg"
+                                                            alt="edit logo"
+                                                            width={24}
+                                                            height={24}
+                                                            className={`${
+                                                                isLimited
+                                                                    ? "opacity-50"
+                                                                    : "opacity-100"
+                                                            }`}
+                                                        />
+                                                    </Button>
                                                 </div>
                                             </FormControl>
                                         </div>
@@ -448,23 +465,20 @@ const Page = () => {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    placeholder="Adjust how many attendees can join the event"
-                                                    {...field}
-                                                    onChange={(e) => {
-                                                        const value =
-                                                            parseFloat(
-                                                                e.target.value
-                                                            );
-                                                        field.onChange(
-                                                            isNaN(value)
-                                                                ? undefined
-                                                                : value
-                                                        );
-                                                    }}
-                                                    onBlur={field.onBlur} // ensure validation or save state when field loses focus
-                                                />
+                                                <div className="w-full flex justify-between items-center text-sm">
+                                                    <p className="text-gray-400">
+                                                        Adjust how many
+                                                        attendees can join the
+                                                        event
+                                                    </p>
+                                                    <InputNumber
+                                                        control={form.control}
+                                                        name="capacity"
+                                                        defaultValue={1}
+                                                        min={1}
+                                                        extraClass="text-sm"
+                                                    />
+                                                </div>
                                             </FormControl>
                                             <FormMessage className="text-red-500" />
                                         </FormItem>
@@ -480,11 +494,15 @@ const Page = () => {
                                         <div>
                                             <FormControl>
                                                 <div className="flex space-x-4 items-center">
-                                                    <Switch
-                                                        checked={isPaid}
-                                                        onCheckedChange={(
-                                                            e
-                                                        ) => {
+                                                    <Label>
+                                                        {isPaid
+                                                            ? "Paid"
+                                                            : "Free"}
+                                                    </Label>
+                                                    <Button
+                                                        variant="ghost"
+                                                        onClick={() => {
+                                                            const e = !isPaid;
                                                             setIsPaid(e);
                                                             if (!e) {
                                                                 form.setValue(
@@ -493,8 +511,19 @@ const Page = () => {
                                                                 );
                                                             }
                                                         }}
-                                                    />
-                                                    <Label>Paid</Label>
+                                                        className="p-0">
+                                                        <Image
+                                                            src="/assets/editIcon.svg"
+                                                            alt="edit logo"
+                                                            width={24}
+                                                            height={24}
+                                                            className={`${
+                                                                isPaid
+                                                                    ? "opacity-50"
+                                                                    : "opacity-100"
+                                                            }`}
+                                                        />
+                                                    </Button>
                                                 </div>
                                             </FormControl>
                                         </div>
@@ -507,9 +536,9 @@ const Page = () => {
                                     control={form.control}
                                     name="tickets"
                                     render={() => (
-                                        <FormItem>
-                                            <FormLabel className="text-base font-bold">
-                                                Paid Tickets
+                                        <FormItem className="flex flex-col space-y-2">
+                                            <FormLabel className="text-base font-bold mt-2">
+                                                Tickets:
                                             </FormLabel>
                                             {fields.map((_, index) => (
                                                 <div
@@ -551,36 +580,42 @@ const Page = () => {
                                                                     field,
                                                                 }) => (
                                                                     <FormItem>
-                                                                        <FormLabel>
-                                                                            Ticket
-                                                                            Price
-                                                                        </FormLabel>
-                                                                        <FormControl>
-                                                                            <Input
-                                                                                type="number"
-                                                                                placeholder="Ticket Price"
-                                                                                {...field}
-                                                                                onChange={(
-                                                                                    e
-                                                                                ) => {
-                                                                                    const value =
-                                                                                        parseFloat(
+                                                                        <FormControl className="w-full">
+                                                                            <div className="w-full flex justify-between items-center space-x-2">
+                                                                                <FormLabel className="whitespace-nowrap">
+                                                                                    Ticket
+                                                                                    Price
+                                                                                </FormLabel>
+                                                                                <div className="flex items-end">
+                                                                                    <Input
+                                                                                        type="text"
+                                                                                        placeholder="Ticket Price"
+                                                                                        {...field}
+                                                                                        onChange={(
                                                                                             e
-                                                                                                .target
-                                                                                                .value
-                                                                                        );
-                                                                                    field.onChange(
-                                                                                        isNaN(
-                                                                                            value
-                                                                                        )
-                                                                                            ? undefined
-                                                                                            : value
-                                                                                    );
-                                                                                }}
-                                                                                onBlur={
-                                                                                    field.onBlur
-                                                                                }
-                                                                            />
+                                                                                        ) => {
+                                                                                            const value =
+                                                                                                parseFloat(
+                                                                                                    e
+                                                                                                        .target
+                                                                                                        .value
+                                                                                                );
+                                                                                            field.onChange(
+                                                                                                isNaN(
+                                                                                                    value
+                                                                                                )
+                                                                                                    ? undefined
+                                                                                                    : value
+                                                                                            );
+                                                                                        }}
+                                                                                        onBlur={
+                                                                                            field.onBlur
+                                                                                        }
+                                                                                        className=" border-b-2 border-t-0 border-r-0 border-l-0 shadow-none focus:border-b-gray-400 focus:ring-0 rounded-none w-fit py-0 text-end"
+                                                                                    />
+                                                                                    VND
+                                                                                </div>
+                                                                            </div>
                                                                         </FormControl>
                                                                         <FormMessage className="text-red-500" />
                                                                     </FormItem>
@@ -617,37 +652,26 @@ const Page = () => {
                                                                 render={({
                                                                     field,
                                                                 }) => (
-                                                                    <FormItem>
-                                                                        <FormLabel>
-                                                                            Ticket
-                                                                            Amount
-                                                                        </FormLabel>
-                                                                        <FormControl>
-                                                                            <Input
-                                                                                type="number"
-                                                                                placeholder="Ticket Price"
-                                                                                {...field}
-                                                                                onChange={(
-                                                                                    e
-                                                                                ) => {
-                                                                                    const value =
-                                                                                        parseFloat(
-                                                                                            e
-                                                                                                .target
-                                                                                                .value
-                                                                                        );
-                                                                                    field.onChange(
-                                                                                        isNaN(
-                                                                                            value
-                                                                                        )
-                                                                                            ? undefined
-                                                                                            : value
-                                                                                    );
-                                                                                }}
-                                                                                onBlur={
-                                                                                    field.onBlur
-                                                                                } // ensure validation or save state when field loses focus
-                                                                            />
+                                                                    <FormItem className="w-full">
+                                                                        <FormControl className="w-full  flex justify-between items-center">
+                                                                            <div>
+                                                                                <FormLabel>
+                                                                                    Ticket
+                                                                                    Amount
+                                                                                </FormLabel>
+                                                                                <InputNumber
+                                                                                    control={
+                                                                                        form.control
+                                                                                    }
+                                                                                    name={`tickets.${index}.ticketAmount`}
+                                                                                    min={
+                                                                                        1
+                                                                                    }
+                                                                                    defaultValue={
+                                                                                        1
+                                                                                    }
+                                                                                />
+                                                                            </div>
                                                                         </FormControl>
                                                                         <FormMessage className="text-red-500" />
                                                                     </FormItem>
@@ -690,7 +714,8 @@ const Page = () => {
                                                                     Price:
                                                                     {form.getValues(
                                                                         `tickets.${index}.ticketPrice`
-                                                                    )}
+                                                                    )}{" "}
+                                                                    VND
                                                                 </p>
                                                                 <p>
                                                                     {" "}
@@ -752,29 +777,19 @@ const Page = () => {
                                 control={form.control}
                                 name="maxTicketsPerUser"
                                 render={({ field }) => (
-                                    <FormItem className="w-full flex justify-between items-center">
-                                        <p className="whitespace-nowrap">
-                                            Max tickets per registrant:
-                                        </p>
-                                        <FormControl>
-                                            <Input
-                                                type="number"
-                                                placeholder="1"
-                                                className="w-fit text-lg text-slate-400 placeholder:text-slate-400 placeholder:opacity-60 placeholder:font-bold border-none hover:placeholder:opacity-100 focus:placeholder:opacity-100 focus:border-b-2 focus:border-b-gray-400 h-fit p-0 m-0"
-                                                value={field.value || ""}
-                                                onChange={(e) => {
-                                                    const value = parseInt(
-                                                        e.target.value
-                                                    );
-                                                    field.onChange(
-                                                        isNaN(value)
-                                                            ? undefined
-                                                            : value
-                                                    );
-                                                }}
-                                                onBlur={field.onBlur}
-                                            />
-                                        </FormControl>
+                                    <FormItem className="w-full">
+                                        <div className=" flex justify-between items-center">
+                                            <p className="whitespace-nowrap">
+                                                Max tickets per registrant:
+                                            </p>
+                                            <FormControl>
+                                                <InputNumber
+                                                    control={form.control}
+                                                    name="maxTicketsPerUser"
+                                                    min={1}
+                                                />
+                                            </FormControl>
+                                        </div>
                                         <FormMessage className="text-red-500" />
                                     </FormItem>
                                 )}
@@ -789,7 +804,6 @@ const Page = () => {
                     </Button>
                 </div>
             </form>
-            <InputNumber />
         </Form>
     );
 };
