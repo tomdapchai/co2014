@@ -29,6 +29,7 @@ import axios from "axios";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import InputNumber from "@/components/InputNumber";
 
 const Page = () => {
     // mock eventId
@@ -113,7 +114,7 @@ const Page = () => {
             capacity: "unlimited",
             ticketType: "free",
             tickets: [],
-            maxTicketsPerUser: 1,
+            maxTicketsPerUser: 0,
         },
     });
 
@@ -162,16 +163,6 @@ const Page = () => {
                     name="logo"
                     render={({ field }) => (
                         <FormItem className="mt-0">
-                            <FormControl className="mt-0">
-                                <Input
-                                    id="picture"
-                                    type="file"
-                                    ref={fileInputRef}
-                                    className="hidden mt-0"
-                                    onChange={handleFileChange}
-                                    // upload img to 3rd party API (imgur, CloudFlare - i prefer this one) to create URL
-                                />
-                            </FormControl>
                             <Image
                                 src={logoSrc}
                                 alt="logo"
@@ -181,6 +172,21 @@ const Page = () => {
                                 className="hover:cursor-pointer hover:brightness-95 mt-0 rounded-xl object-contain"
                             />
                             <FormMessage className="text-red-500" />
+                            <FormControl className="mt-0">
+                                <Input
+                                    id="picture"
+                                    type="file"
+                                    ref={fileInputRef}
+                                    className="hidden mt-0"
+                                    onChange={(e) => {
+                                        if (!e.target.files) return; // Early return if no files
+                                        handleFileChange(e);
+                                        field.onChange(e.target.files[0]); // Update form state
+                                    }}
+                                    name={field.name}
+                                    // upload img to 3rd party API (imgur, CloudFlare - i prefer this one) to create URL
+                                />
+                            </FormControl>
                         </FormItem>
                     )}
                 />
@@ -327,11 +333,14 @@ const Page = () => {
                             name="location"
                             render={({ field }) => (
                                 <FormItem className="w-full flex flex-col items-start gap-1">
+                                    <FormLabel className="font-bold text-lg">
+                                        Location:
+                                    </FormLabel>
                                     <div className="w-full flex items-center justify-between gap-4">
                                         <FormControl>
                                             <Input
                                                 type="text"
-                                                placeholder="Location"
+                                                placeholder="Enter event location..."
                                                 className="text-lg text-slate-400 placeholder:text-slate-400 placeholder:opacity-60 placeholder:font-bold border-none hover:placeholder:opacity-100 focus:placeholder:opacity-100 focus:border-b-2 focus:border-b-gray-400 h-fit p-0 m-0"
                                                 {...field}
                                             />
@@ -359,11 +368,14 @@ const Page = () => {
                                 name="guideline"
                                 render={({ field }) => (
                                     <FormItem>
+                                        <FormLabel className="text-base font-bold">
+                                            Guideline:
+                                        </FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="text"
-                                                placeholder="Guideline"
-                                                className="text-lg text-slate-400 placeholder:text-slate-400 placeholder:opacity-60 placeholder:font-bold border-none hover:placeholder:opacity-100 focus:placeholder:opacity-100 focus:border-b-2 focus:border-b-gray-400 h-fit p-0 m-0"
+                                                placeholder="Add instructions for joining the event"
+                                                className="text-base text-slate-400 placeholder:text-slate-400 placeholder:opacity-60 placeholder:font-bold border-none hover:placeholder:opacity-100 focus:placeholder:opacity-100 focus:border-b-2 focus:border-b-gray-400 h-fit p-0 m-0"
                                                 {...field}
                                             />
                                         </FormControl>
@@ -438,25 +450,20 @@ const Page = () => {
                                             <FormControl>
                                                 <Input
                                                     type="number"
-                                                    placeholder="Capacity"
-                                                    value={
-                                                        field.value ===
-                                                        "unlimited"
-                                                            ? ""
-                                                            : field.value
-                                                    }
+                                                    placeholder="Adjust how many attendees can join the event"
+                                                    {...field}
                                                     onChange={(e) => {
-                                                        const value = e.target
-                                                            .value
-                                                            ? parseInt(
-                                                                  e.target
-                                                                      .value,
-                                                                  10
-                                                              )
-                                                            : "unlimited";
-                                                        field.onChange(value);
+                                                        const value =
+                                                            parseFloat(
+                                                                e.target.value
+                                                            );
+                                                        field.onChange(
+                                                            isNaN(value)
+                                                                ? undefined
+                                                                : value
+                                                        );
                                                     }}
-                                                    className="..."
+                                                    onBlur={field.onBlur} // ensure validation or save state when field loses focus
                                                 />
                                             </FormControl>
                                             <FormMessage className="text-red-500" />
@@ -756,7 +763,7 @@ const Page = () => {
                                                 className="w-fit text-lg text-slate-400 placeholder:text-slate-400 placeholder:opacity-60 placeholder:font-bold border-none hover:placeholder:opacity-100 focus:placeholder:opacity-100 focus:border-b-2 focus:border-b-gray-400 h-fit p-0 m-0"
                                                 value={field.value || ""}
                                                 onChange={(e) => {
-                                                    const value = parseFloat(
+                                                    const value = parseInt(
                                                         e.target.value
                                                     );
                                                     field.onChange(
@@ -782,6 +789,7 @@ const Page = () => {
                     </Button>
                 </div>
             </form>
+            <InputNumber />
         </Form>
     );
 };

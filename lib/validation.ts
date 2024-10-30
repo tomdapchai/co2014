@@ -57,9 +57,7 @@ export const createEventSchema = z
         guideline: z.optional(z.string().max(200)),
         capacity: z.union([z.string(), z.number().int().positive()]),
         ticketType: z.enum(["free", "paid"]),
-        // Optional fields for paid tickets
         tickets: z.optional(z.array(ticketDetailSchema)),
-        // End of optional fields
         maxTicketsPerUser: z.number().int().positive(),
     })
     .refine((data) => new Date(data.start) <= new Date(data.end), {
