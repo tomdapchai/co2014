@@ -71,7 +71,11 @@ const InputNumber = ({
 
     return (
         <div className="flex">
-            <Button type="button" variant="ghost" onClick={handleDecrement}>
+            <Button
+                type="button"
+                variant="ghost"
+                onClick={handleDecrement}
+                className="rounded-full">
                 -
             </Button>
             <Input
@@ -87,7 +91,11 @@ const InputNumber = ({
                 max={max}
                 step={step}
             />
-            <Button type="button" variant="ghost" onClick={handleIncrement}>
+            <Button
+                type="button"
+                variant="ghost"
+                onClick={handleIncrement}
+                className="rounded-full">
                 +
             </Button>
         </div>

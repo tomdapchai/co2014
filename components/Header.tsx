@@ -12,6 +12,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { notificationProps } from "@/types";
+import Image from "next/image";
 
 const Header = () => {
     const [notifications, setNotifications] = useState<notificationProps[]>([]);
@@ -87,10 +88,16 @@ const Header = () => {
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button
-                            variant="outline"
+                            variant="ghost"
                             size="icon"
                             className="rounded-full">
-                            Noti
+                            <Image
+                                src="/assets/notiIcon.svg"
+                                alt="edit logo"
+                                width={24}
+                                height={24}
+                                className=""
+                            />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-56">
@@ -126,9 +133,17 @@ const Header = () => {
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button
-                            variant="outline"
+                            variant="ghost"
                             size="icon"
-                            className="rounded-full"></Button>
+                            className="rounded-full">
+                            <Image
+                                src="/assets/avatar.png"
+                                alt="avatar"
+                                width={30}
+                                height={30}
+                                className=""
+                            />
+                        </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-56">
                         <DropdownMenuLabel>My Account</DropdownMenuLabel>

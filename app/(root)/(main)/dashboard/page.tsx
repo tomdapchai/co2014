@@ -92,8 +92,8 @@ const Page = () => {
                 location: "Ha Noi City",
                 attendees: 300,
                 byUser: {
-                    id: "1",
-                    name: "User 1",
+                    id: "2",
+                    name: "User 2",
                     avatar: "/assets/avatar.png",
                 },
             },

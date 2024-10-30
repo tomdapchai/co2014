@@ -12,8 +12,13 @@ body {
     width: 100%;
     margin: 0;
     padding: 0;
-    overflow-x: hidden;
     background-attachment: fixed;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+
+body::-webkit-scrollbar {
+    display: none;
 }
 
 @layer utilities {

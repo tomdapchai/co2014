@@ -31,6 +31,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import InputNumber from "@/components/InputNumber";
 import { set } from "date-fns";
+import TicketCard from "@/components/card/TicketCard";
 
 const Page = () => {
     // mock eventId
@@ -138,6 +139,14 @@ const Page = () => {
             if (!isPaid) {
                 data.tickets = [];
             }
+            if (
+                isPaid &&
+                (typeof data.tickets === "undefined" ||
+                    data.tickets.length === 0)
+            ) {
+                data.ticketType = "free";
+                setIsPaid(false);
+            }
             // make async call to create event
             // contain all form data
             // navigate to event page
@@ -201,7 +210,7 @@ const Page = () => {
                                     onValueChange={field.onChange}
                                     defaultValue={field.value}>
                                     <FormControl>
-                                        <SelectTrigger className="w-fit border-none rounded-lg bg-slate-50">
+                                        <SelectTrigger className="w-fit border-none rounded-lg bg-slate-50 shadow-xl">
                                             <SelectValue>
                                                 {field.value
                                                     .charAt(0)
@@ -419,7 +428,7 @@ const Page = () => {
                                         <p>Capacity</p>
                                         <div>
                                             <FormControl>
-                                                <div className="flex space-x-4 items-center">
+                                                <div className="flex space-x-2 items-center">
                                                     <Label>
                                                         {isLimited
                                                             ? "Limited"
@@ -427,7 +436,8 @@ const Page = () => {
                                                     </Label>
                                                     <Button
                                                         variant="ghost"
-                                                        className="p-0"
+                                                        className="p-0 rounded-full"
+                                                        size="icon"
                                                         onClick={() => {
                                                             const e =
                                                                 !isLimited;
@@ -436,6 +446,11 @@ const Page = () => {
                                                                 form.setValue(
                                                                     "capacity",
                                                                     "unlimited"
+                                                                );
+                                                            } else {
+                                                                form.setValue(
+                                                                    "capacity",
+                                                                    1
                                                                 );
                                                             }
                                                         }}>
@@ -493,7 +508,7 @@ const Page = () => {
                                         <p>Ticket Type</p>
                                         <div>
                                             <FormControl>
-                                                <div className="flex space-x-4 items-center">
+                                                <div className="flex space-x-2 items-center">
                                                     <Label>
                                                         {isPaid
                                                             ? "Paid"
@@ -501,6 +516,7 @@ const Page = () => {
                                                     </Label>
                                                     <Button
                                                         variant="ghost"
+                                                        size="icon"
                                                         onClick={() => {
                                                             const e = !isPaid;
                                                             setIsPaid(e);
@@ -511,7 +527,7 @@ const Page = () => {
                                                                 );
                                                             }
                                                         }}
-                                                        className="p-0">
+                                                        className="p-0 rounded-full">
                                                         <Image
                                                             src="/assets/editIcon.svg"
                                                             alt="edit logo"
@@ -546,7 +562,7 @@ const Page = () => {
                                                     className="bg-gray-50 p-4 rounded-md mb-4">
                                                     {editingTicketIndex ===
                                                     index ? (
-                                                        <>
+                                                        <div className="flex flex-col space-y-2">
                                                             <FormField
                                                                 control={
                                                                     form.control
@@ -611,7 +627,7 @@ const Page = () => {
                                                                                         onBlur={
                                                                                             field.onBlur
                                                                                         }
-                                                                                        className=" border-b-2 border-t-0 border-r-0 border-l-0 shadow-none focus:border-b-gray-400 focus:ring-0 rounded-none w-fit py-0 text-end"
+                                                                                        className=" border-b-2 border-t-0 border-r-0 border-l-0 shadow-none focus:border-b-gray-400 focus:ring-0 rounded-none w-fit h-fit py-0 text-end"
                                                                                     />
                                                                                     VND
                                                                                 </div>
@@ -677,80 +693,113 @@ const Page = () => {
                                                                     </FormItem>
                                                                 )}
                                                             />
-                                                            <div className="flex justify-end">
+                                                            <div className="flex justify-end items-center space-x-2">
                                                                 <Button
                                                                     type="button"
+                                                                    variant="ghost"
+                                                                    size="icon"
                                                                     onClick={() =>
                                                                         setEditingTicketIndex(
                                                                             -1
                                                                         )
-                                                                    }>
-                                                                    Complete
+                                                                    }
+                                                                    className="rounded-full">
+                                                                    <Image
+                                                                        src="/assets/checkIcon.svg"
+                                                                        alt="edit logo"
+                                                                        width={
+                                                                            24
+                                                                        }
+                                                                        height={
+                                                                            24
+                                                                        }
+                                                                        className="rounded-full"
+                                                                    />
                                                                 </Button>
                                                                 <Button
                                                                     type="button"
-                                                                    variant="destructive"
+                                                                    variant="ghost"
+                                                                    size="icon"
                                                                     onClick={() =>
                                                                         remove(
                                                                             index
                                                                         )
-                                                                    }>
-                                                                    Remove
+                                                                    }
+                                                                    className="rounded-full">
+                                                                    <Image
+                                                                        src="/assets/removeIcon.svg"
+                                                                        alt="edit logo"
+                                                                        width={
+                                                                            18
+                                                                        }
+                                                                        height={
+                                                                            18
+                                                                        }
+                                                                        className=""
+                                                                    />
                                                                 </Button>
                                                             </div>
-                                                        </>
+                                                        </div>
                                                     ) : (
-                                                        <div className="flex flex-col w-full">
-                                                            <div className="flex justify-between w-full">
-                                                                <p>
-                                                                    {" "}
-                                                                    Name:
-                                                                    {form.getValues(
-                                                                        `tickets.${index}.ticketName`
-                                                                    )}
-                                                                </p>
-                                                                <p>
-                                                                    {" "}
-                                                                    Price:
-                                                                    {form.getValues(
-                                                                        `tickets.${index}.ticketPrice`
-                                                                    )}{" "}
-                                                                    VND
-                                                                </p>
-                                                                <p>
-                                                                    {" "}
-                                                                    Amount:
-                                                                    {form.getValues(
-                                                                        `tickets.${index}.ticketAmount`
-                                                                    )}
-                                                                </p>
-                                                            </div>
-                                                            <p>
-                                                                {" "}
-                                                                Description:
-                                                                {form.getValues(
+                                                        <div className="flex space-x-2 justify-between w-full">
+                                                            <TicketCard
+                                                                name={form.getValues(
+                                                                    `tickets.${index}.ticketName`
+                                                                )}
+                                                                price={form.getValues(
+                                                                    `tickets.${index}.ticketPrice`
+                                                                )}
+                                                                amount={form.getValues(
+                                                                    `tickets.${index}.ticketAmount`
+                                                                )}
+                                                                description={form.getValues(
                                                                     `tickets.${index}.ticketDescription`
                                                                 )}
-                                                            </p>
-                                                            <div className="flex justify-end">
+                                                            />
+                                                            <div className="flex flex-col justify-end space-y-2">
                                                                 <Button
                                                                     type="button"
+                                                                    variant="ghost"
                                                                     onClick={() =>
                                                                         setEditingTicketIndex(
                                                                             index
                                                                         )
-                                                                    }>
-                                                                    Edit
+                                                                    }
+                                                                    size="icon"
+                                                                    className="rounded-full">
+                                                                    <Image
+                                                                        src="/assets/editIcon.svg"
+                                                                        alt="edit logo"
+                                                                        width={
+                                                                            24
+                                                                        }
+                                                                        height={
+                                                                            24
+                                                                        }
+                                                                        className=""
+                                                                    />
                                                                 </Button>
                                                                 <Button
                                                                     type="button"
-                                                                    variant="destructive"
+                                                                    variant="ghost"
                                                                     onClick={() =>
                                                                         remove(
                                                                             index
                                                                         )
-                                                                    }>
-                                                                    Remove
+                                                                    }
+                                                                    size="icon"
+                                                                    className="rounded-full">
+                                                                    <Image
+                                                                        src="/assets/removeIcon.svg"
+                                                                        alt="edit logo"
+                                                                        width={
+                                                                            20
+                                                                        }
+                                                                        height={
+                                                                            20
+                                                                        }
+                                                                        className=""
+                                                                    />
                                                                 </Button>
                                                             </div>
                                                         </div>
@@ -798,7 +847,7 @@ const Page = () => {
                     </div>
                     <Button
                         type="submit"
-                        className="bg-white text-slate-950 text-lg py-6 hover:bg-gray-50"
+                        className="text-lg py-6"
                         disabled={isCreating}>
                         Create Event
                     </Button>

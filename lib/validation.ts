@@ -20,9 +20,9 @@ const minDateTime = new Date().toISOString().slice(0, 16);
 
 const ticketDetailSchema = z.object({
     ticketName: z.string().min(3).max(50),
-    ticketPrice: z.number().int().positive(),
+    ticketPrice: z.number().int().nonnegative(),
     ticketDescription: z.optional(z.string().max(200)),
-    ticketAmount: z.union([z.literal("unlimited"), z.number().positive()]),
+    ticketAmount: z.number().positive(),
 });
 
 export const createEventSchema = z
@@ -75,10 +75,8 @@ export const createEventSchema = z
                         ticket.ticketName.length >= 3 &&
                         (typeof ticket.ticketDescription === "undefined" ||
                             ticket.ticketDescription.length <= 200) &&
-                        ((typeof ticket.ticketAmount === "string" &&
-                            ticket.ticketAmount == "unlimited") ||
-                            (typeof ticket.ticketAmount === "number" &&
-                                ticket.ticketAmount > 0))
+                        typeof ticket.ticketAmount === "number" &&
+                        ticket.ticketAmount > 0
                     );
                 }) &&
                 // Check for distinct ticket names
