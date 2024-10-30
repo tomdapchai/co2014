@@ -64,7 +64,7 @@ const Page = () => {
         if (startDate < now) {
             return false;
         }
-        if (end && endDate < startDate) {
+        if (end && endDate <= startDate) {
             return false;
         }
         return true;
@@ -145,7 +145,6 @@ const Page = () => {
                     data.tickets.length === 0)
             ) {
                 data.ticketType = "free";
-                setIsPaid(false);
             }
             // make async call to create event
             // contain all form data
