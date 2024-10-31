@@ -32,6 +32,8 @@ import { Textarea } from "@/components/ui/textarea";
 import InputNumber from "@/components/InputNumber";
 import { set } from "date-fns";
 import TicketCard from "@/components/card/TicketCard";
+import { CldImage } from "next-cloudinary";
+import LogoUpload from "@/components/LogoUpload";
 
 const Page = () => {
     // mock eventId
@@ -50,12 +52,9 @@ const Page = () => {
     const [isPaid, setIsPaid] = useState(false);
     const [editingTicketIndex, setEditingTicketIndex] = useState(0);
 
+    // Cloudinary
+
     // handlings
-    const handleImageClick = () => {
-        if (fileInputRef.current) {
-            fileInputRef.current.click();
-        }
-    };
 
     const validateDate = (start: string, end: string): boolean => {
         const now = new Date();
@@ -68,32 +67,6 @@ const Page = () => {
             return false;
         }
         return true;
-    };
-
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        // only .png, .jpg, .jpeg .webp
-        // max size 1mb
-        // validate file type and size
-        // post to 3rd party API to get URL
-        if (file) {
-            // Check file type
-            const validType = [
-                "image/png",
-                "image/jpg",
-                "image/jpeg",
-                "image/webp",
-            ];
-            if (!validType.includes(file.type)) {
-                alert(
-                    "Invalid file type. Only .png, .jpg, .jpeg, .webp are allowed"
-                );
-                return;
-            }
-
-            const src = URL.createObjectURL(file);
-            setLogoSrc(src);
-        }
     };
 
     const form = useForm<z.infer<typeof createEventSchema>>({
@@ -167,37 +140,10 @@ const Page = () => {
             <form
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="flex w-full gap-10 justify-center items-start">
-                <FormField
+                <LogoUpload
                     control={form.control}
                     name="logo"
-                    render={({ field }) => (
-                        <FormItem className="mt-0">
-                            <Image
-                                src={logoSrc}
-                                alt="logo"
-                                width={300}
-                                height={300}
-                                onClick={handleImageClick}
-                                className="hover:cursor-pointer hover:brightness-95 mt-0 rounded-xl object-contain"
-                            />
-                            <FormMessage className="text-red-500" />
-                            <FormControl className="mt-0">
-                                <Input
-                                    id="picture"
-                                    type="file"
-                                    ref={fileInputRef}
-                                    className="hidden mt-0"
-                                    onChange={(e) => {
-                                        if (!e.target.files) return; // Early return if no files
-                                        handleFileChange(e);
-                                        field.onChange(e.target.files[0]); // Update form state
-                                    }}
-                                    name={field.name}
-                                    // upload img to 3rd party API (imgur, CloudFlare - i prefer this one) to create URL
-                                />
-                            </FormControl>
-                        </FormItem>
-                    )}
+                    defaultImage={logoSrc} // Optional
                 />
                 <div className="flex flex-col gap-4">
                     <FormField
