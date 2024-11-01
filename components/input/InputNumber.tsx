@@ -1,6 +1,6 @@
 import React from "react";
-import { Input, InputProps } from "./ui/input";
-import { Button } from "./ui/button";
+import { Input, InputProps } from "../ui/input";
+import { Button } from "../ui/button";
 import { useController, Control } from "react-hook-form";
 
 interface InputNumberProps extends Omit<InputProps, "value" | "onChange"> {

@@ -28,7 +28,7 @@ const ticketDetailSchema = z.object({
 export const createEventSchema = z
     .object({
         name: z.string().min(3).max(50),
-        logo: z.optional(z.string()),
+        logo: z.string(),
         type: z.enum(["public", "private"]),
         start: z
             .string()

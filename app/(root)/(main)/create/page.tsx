@@ -29,11 +29,11 @@ import axios from "axios";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import InputNumber from "@/components/InputNumber";
-import { set } from "date-fns";
+import InputNumber from "@/components/input/InputNumber";
 import TicketCard from "@/components/card/TicketCard";
-import { CldImage } from "next-cloudinary";
-import LogoUpload from "@/components/LogoUpload";
+import LogoUpload from "@/components/input/LogoUpload";
+import SelectForm from "@/components/input/SelectForm";
+import InputDateTime from "@/components/input/InputDateTime";
 
 const Page = () => {
     // mock eventId
@@ -51,23 +51,6 @@ const Page = () => {
     const [isLimited, setIsLimited] = useState(false);
     const [isPaid, setIsPaid] = useState(false);
     const [editingTicketIndex, setEditingTicketIndex] = useState(0);
-
-    // Cloudinary
-
-    // handlings
-
-    const validateDate = (start: string, end: string): boolean => {
-        const now = new Date();
-        const startDate = new Date(start);
-        const endDate = new Date(end);
-        if (startDate < now) {
-            return false;
-        }
-        if (end && endDate <= startDate) {
-            return false;
-        }
-        return true;
-    };
 
     const form = useForm<z.infer<typeof createEventSchema>>({
         resolver: zodResolver(createEventSchema),
@@ -123,9 +106,9 @@ const Page = () => {
             // contain all form data
             // navigate to event page
             console.log(data);
-            //alert("Creating event");
 
-            // router.push(`/event/${eventId}`);
+            /* const {eventId} = await axios.post("/api/event", data);
+            router.push(`/manage/${eventId}`); */
         } catch (error) {
             console.log(data.start);
             console.error(error);
@@ -146,52 +129,24 @@ const Page = () => {
                     defaultImage={logoSrc} // Optional
                 />
                 <div className="flex flex-col gap-4">
-                    <FormField
+                    <SelectForm
                         control={form.control}
                         name="type"
-                        render={({ field }) => (
-                            <FormItem>
-                                <Select
-                                    onValueChange={field.onChange}
-                                    defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger className="w-fit border-none rounded-lg bg-slate-50 shadow-xl">
-                                            <SelectValue>
-                                                {field.value
-                                                    .charAt(0)
-                                                    .toUpperCase() +
-                                                    field.value.slice(1)}
-                                            </SelectValue>
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem
-                                            value="public"
-                                            className="flex flex-col justify-center items-start">
-                                            <p className="font-bold text-base">
-                                                Public
-                                            </p>
-                                            <p className="text-gray-400">
-                                                Everyone can see this event and
-                                                register
-                                            </p>
-                                        </SelectItem>
-                                        <SelectItem
-                                            value="private"
-                                            className="flex flex-col justify-center items-start">
-                                            <p className="font-bold text-base">
-                                                Private
-                                            </p>
-                                            <p className="text-gray-400">
-                                                Only allowed people can see this
-                                                event to register
-                                            </p>
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage className="text-red-500" />
-                            </FormItem>
-                        )}
+                        options={[
+                            {
+                                value: "public",
+                                label: "Public",
+                                description:
+                                    "Everyone can see this event and register",
+                            },
+                            {
+                                value: "private",
+                                label: "Private",
+                                description:
+                                    "Only allowed people can see this event to register",
+                            },
+                        ]}
+                        triggerClassName="w-fit border-none rounded-lg bg-slate-50 shadow-xl"
                     />
                     <FormField
                         control={form.control}
@@ -211,76 +166,22 @@ const Page = () => {
                         )}
                     />
                     <div className="w-full flex flex-col bg-slate-50 shadow-lg rounded-md justify-center px-3 divide-y-[1px] divide-gray-400">
-                        <FormField
-                            control={form.control}
-                            name="start"
-                            rules={{
-                                validate: (value) =>
-                                    validateDate(value, form.getValues("end")),
-                            }}
-                            render={({ field, fieldState }) => (
-                                <FormItem>
-                                    <div className="w-full flex items-center justify-between">
-                                        <p>Start</p>
-                                        <div>
-                                            <FormControl>
-                                                <Input
-                                                    type="datetime-local"
-                                                    className="border-none focus:border-b-2 focus:border-slate-400"
-                                                    min={new Date()
-                                                        .toISOString()
-                                                        .slice(0, 16)}
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            {fieldState.error && (
-                                                <FormMessage className="text-red-500">
-                                                    {fieldState.error.message}
-                                                </FormMessage>
-                                            )}
-                                        </div>
-                                    </div>
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="end"
-                            rules={{
-                                validate: (value) =>
-                                    validateDate(
-                                        form.getValues("start"),
-                                        value
-                                    ),
-                            }}
-                            render={({ field, fieldState }) => (
-                                <FormItem>
-                                    <div className="w-full flex justify-between items-center">
-                                        <p>End</p>
-                                        <div>
-                                            <FormControl>
-                                                <Input
-                                                    type="datetime-local"
-                                                    className="border-none focus:border-b-2 focus:border-slate-400"
-                                                    min={
-                                                        form.watch("start") ||
-                                                        new Date()
-                                                            .toISOString()
-                                                            .slice(0, 16)
-                                                    }
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            {fieldState.error && (
-                                                <FormMessage className="text-red-500">
-                                                    {fieldState.error.message}
-                                                </FormMessage>
-                                            )}
-                                        </div>
-                                    </div>
-                                </FormItem>
-                            )}
-                        />
+                        <div className="w-full flex items-center justify-between">
+                            <FormLabel className="">From</FormLabel>
+                            <InputDateTime
+                                control={form.control}
+                                name="start"
+                                form={form}
+                            />
+                        </div>
+                        <div className="w-full flex items-center justify-between">
+                            <FormLabel>To</FormLabel>
+                            <InputDateTime
+                                control={form.control}
+                                name="end"
+                                form={form}
+                            />
+                        </div>
                     </div>
                     <div className="w-full flex-col space-y-4">
                         <FormField
@@ -469,6 +370,11 @@ const Page = () => {
                                                                 form.setValue(
                                                                     "ticketType",
                                                                     "free"
+                                                                );
+                                                            } else {
+                                                                form.setValue(
+                                                                    "ticketType",
+                                                                    "paid"
                                                                 );
                                                             }
                                                         }}
@@ -714,7 +620,7 @@ const Page = () => {
                                                                     className="rounded-full">
                                                                     <Image
                                                                         src="/assets/editIcon.svg"
-                                                                        alt="edit logo"
+                                                                        alt="edit icon"
                                                                         width={
                                                                             24
                                                                         }
