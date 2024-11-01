@@ -1,10 +1,6 @@
 import React from "react";
 
-interface Props {
-    eventId: string;
-}
-
-const Guests = ({ eventId }: Props) => {
+const Guests = () => {
     return <div>Guests</div>;
 };
 

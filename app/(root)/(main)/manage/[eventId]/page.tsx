@@ -1,12 +1,12 @@
-"use client";
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
+import { EventProvider } from "@/context/EventContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Overview from "@/components/tab/Overview";
 import Guests from "@/components/tab/Guests";
 import Registrations from "@/components/tab/Registrations";
 import Insights from "@/components/tab/Insights";
 
-const page = async ({ params }: any) => {
+const page = ({ params }: { params: { eventId: string } }) => {
     // store eventId from params
     const eventId = params.eventId;
     // check if there is event with eventId available, if not, return 404 page
@@ -18,28 +18,32 @@ const page = async ({ params }: any) => {
 
     // will fetch data here not component
     return (
-        <Tabs
-            defaultValue="overview"
-            className="w-full flex flex-col justify-center items-center">
-            <TabsList>
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="guests">Guests</TabsTrigger>
-                <TabsTrigger value="registrations">Registrations</TabsTrigger>
-                <TabsTrigger value="insights">Insights</TabsTrigger>
-            </TabsList>
-            <TabsContent value="overview">
-                <Overview eventId={eventId} />
-            </TabsContent>
-            <TabsContent value="guests">
-                <Guests eventId={eventId} />
-            </TabsContent>
-            <TabsContent value="registrations">
-                <Registrations eventId={eventId} />
-            </TabsContent>
-            <TabsContent value="insights">
-                <Insights eventId={eventId} />
-            </TabsContent>
-        </Tabs>
+        <EventProvider eventId={params.eventId}>
+            <Tabs
+                defaultValue="overview"
+                className="w-full flex flex-col justify-center items-center">
+                <TabsList>
+                    <TabsTrigger value="overview">Overview</TabsTrigger>
+                    <TabsTrigger value="guests">Guests</TabsTrigger>
+                    <TabsTrigger value="registrations">
+                        Registrations
+                    </TabsTrigger>
+                    <TabsTrigger value="insights">Insights</TabsTrigger>
+                </TabsList>
+                <TabsContent value="overview">
+                    <Overview />
+                </TabsContent>
+                <TabsContent value="guests">
+                    <Guests />
+                </TabsContent>
+                <TabsContent value="registrations">
+                    <Registrations />
+                </TabsContent>
+                <TabsContent value="insights">
+                    <Insights />
+                </TabsContent>
+            </Tabs>
+        </EventProvider>
     );
 };
 

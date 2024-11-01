@@ -19,3 +19,25 @@ export interface notificationProps {
     description: string;
     time: Date;
 }
+
+export interface TicketDetail {
+    ticketName: string;
+    ticketPrice: number;
+    ticketDescription?: string;
+    ticketAmount: number;
+}
+
+export interface EventData {
+    name: string;
+    logo: string;
+    type: "public" | "private";
+    start: string;
+    end: string;
+    description?: string;
+    location: string;
+    guideline?: string;
+    capacity: string | number;
+    ticketType: "free" | "paid";
+    tickets?: TicketDetail[];
+    maxTicketsPerUser: number;
+}

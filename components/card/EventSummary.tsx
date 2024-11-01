@@ -1,6 +1,6 @@
 // components/EventSummary.tsx
 import { Button } from "@/components/ui/button";
-import { EventData } from "../tab/Overview";
+import { EventData } from "@/types";
 import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
 import Image from "next/image";
 

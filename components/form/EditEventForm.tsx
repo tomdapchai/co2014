@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { SheetFooter } from "@/components/ui/sheet";
-import { EventData } from "../tab/Overview";
+import { EventData } from "@/types";
 import { Input } from "../ui/input";
 import { useForm, useFieldArray } from "react-hook-form";
 import { createEventSchema } from "@/lib/validation";
@@ -16,15 +16,7 @@ import {
     FormLabel,
     FormMessage,
 } from "../ui/form";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import LogoUpload from "../input/LogoUpload";
-import { Label } from "../ui/label";
 import SelectForm from "../input/SelectForm";
 import InputDateTime from "../input/InputDateTime";
 import { Textarea } from "../ui/textarea";

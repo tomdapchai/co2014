@@ -1,10 +1,6 @@
 import React from "react";
 
-interface Props {
-    eventId: string;
-}
-
-const Insights = ({ eventId }: Props) => {
+const Insights = () => {
     return <div>Insights</div>;
 };
 
