@@ -24,10 +24,14 @@ import { useForm } from "react-hook-form";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 const SignIn = () => {
+    const { login } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
+    const [isLoggedInSuccess, setIsLoggedInSuccess] = useState(true);
 
     const form = useForm<z.infer<typeof SignInSchema>>({
         resolver: zodResolver(SignInSchema),
@@ -39,6 +43,14 @@ const SignIn = () => {
 
     async function onSubmit(values: z.infer<typeof SignInSchema>) {
         // do validation here
+        try {
+            await login(values.email, values.password);
+            setIsLoggedInSuccess(true);
+        } catch (error) {
+            console.error(error);
+            setIsLoggedInSuccess(false);
+            // suppose to display error message here (use toast)
+        }
         router.push("/dashboard");
     }
 

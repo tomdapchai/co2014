@@ -11,12 +11,6 @@ const page = ({ params }: { params: { eventId: string } }) => {
     const eventId = params.eventId;
     // check if there is event with eventId available, if not, return 404 page
 
-    // event = getEventById(eventId)...
-    // i have to figure out how to just fetch whenever there is something changes in data, maybe use useEffect
-    const guests = [];
-    const registrations = [];
-
-    // will fetch data here not component
     return (
         <EventProvider eventId={params.eventId}>
             <Tabs

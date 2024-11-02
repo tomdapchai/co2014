@@ -81,7 +81,10 @@ export const EventProvider = ({ children, eventId }: EventProviderProps) => {
                     },
                 ],
                 maxTicketsPerUser: 10,
+                registrations: [],
             });
+
+            console.log("Fetched", eventData);
         } catch (error) {
             console.error("Failed to fetch event:", error);
         } finally {

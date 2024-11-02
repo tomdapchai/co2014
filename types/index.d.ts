@@ -40,4 +40,14 @@ export interface EventData {
     ticketType: "free" | "paid";
     tickets?: TicketDetail[];
     maxTicketsPerUser: number;
+    registrations: Registration[]; // for storing registrations
+}
+
+export interface Registration {
+    userId: string;
+    ticketId: string;
+    type: "free" | "paid";
+    ticketName?: string; // for paid ticket
+    status?: "pending" | "approved" | "rejected";
+    hasChekedIn: boolean;
 }

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
     Sheet,
     SheetContent,
@@ -10,6 +10,7 @@ import EventSummary from "../card/EventSummary";
 import EditEventForm from "../form/EditEventForm";
 import { useEventContext } from "@/context/EventContext";
 import { EventData } from "@/types";
+import { Label } from "../ui/label";
 
 const Overview = () => {
     const { eventData, updateEventData, isLoading } = useEventContext();
@@ -51,6 +52,11 @@ const Overview = () => {
                     />
                 </SheetContent>
             </Sheet>
+
+            <Label>Who's going</Label>
+            {/* display total number of successful register table (userId) */}
+            <Label>Registrations</Label>
+            {/* display total number of register table (userId) */}
         </div>
     );
 };

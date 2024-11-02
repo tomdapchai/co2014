@@ -1,26 +1,30 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import React from "react";
+import { useAuth } from "@/context/AuthContext";
 
 const page = () => {
+    const { isLoggedIn } = useAuth();
     return (
         <div className="flex flex-col justify-between items-center w-full h-full">
             <header className="flex justify-between py-5 px-5 w-full">
                 <Link href="/">
                     <h1 className="text-3xl font-bold">LAMBO</h1>
                 </Link>
-                <div className="flex gap-5">
-                    <Button
-                        className="background-light text-dark hover:bg-white/80"
-                        asChild>
-                        <Link href={"/sign-up"}>Sign up</Link>
-                    </Button>
-                    <Button
-                        className="background-dark text-light hover:bg-black/80"
-                        asChild>
-                        <Link href={"/sign-in"}>Sign In</Link>
-                    </Button>
-                </div>
+                {!isLoggedIn && (
+                    <div className="flex gap-5">
+                        <Button
+                            className="background-light text-dark hover:bg-white/80"
+                            asChild>
+                            <Link href={"/sign-up"}>Sign up</Link>
+                        </Button>
+                        <Button
+                            className="background-dark text-light hover:bg-black/80"
+                            asChild>
+                            <Link href={"/sign-in"}>Sign In</Link>
+                        </Button>
+                    </div>
+                )}
             </header>
             <div className="flex flex-row justify-between gap-32 max-md:flex-col max-md:gap-0 max-md:items-center">
                 <div className="w-[300px] py-10 max-md:flex max-md:flex-col max-md:justify-center max-md:items-center max-md:pt-0 ">
@@ -38,7 +42,9 @@ const page = () => {
                     <Button
                         className="background-dark mt-8 py-5 font-bold"
                         asChild>
-                        <Link href="/sign-in" className="text-light text-base">
+                        <Link
+                            href={isLoggedIn ? "/dashboard" : "/sign-in"}
+                            className="text-light text-base">
                             Create your first event
                         </Link>
                     </Button>
