@@ -1,12 +1,18 @@
 "use client";
-import React, { useState, useContext, createContext } from "react";
+import React, { useState, useContext, createContext, useEffect } from "react";
+import {
+    loginUser,
+    registerUser,
+    AuthResponse,
+} from "@/lib/actions/auth.action";
 
 interface AuthContextProps {
     isLoggedIn: boolean;
     userId: string;
-    login: (email: string, password: string) => void;
+    error: string | null;
+    login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
-    register: (email: string, password: string) => void;
+    register: (email: string, password: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -26,32 +32,62 @@ interface AuthProviderProps {
 const AuthProvider = ({ children }: AuthProviderProps) => {
     const [userId, setUserId] = useState<string>("");
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+
+    //mock data
+    useEffect(() => {
+        setUserId("1234");
+    }, []);
 
     const login = async (email: string, password: string) => {
         try {
-            // do login request here, send credentials to server
+            const response = await loginUser(email, password);
 
-            // after login success
-            setUserId(userId);
-            setIsLoggedIn(true);
+            if (response.success && response.userId) {
+                setUserId(response.userId);
+                setIsLoggedIn(true);
+                setError(null);
+            } else {
+                setError(response.message);
+                throw new Error(response.message);
+            }
         } catch (error) {
-            throw new Error("Invalid credentials");
+            setError(
+                error instanceof Error ? error.message : "An error occurred"
+            );
+            throw error;
         }
     };
 
     const register = async (email: string, password: string) => {
         try {
-            // do register request here, send credentials to server
+            const response = await registerUser(email, password);
+
+            if (response.success && response.userId) {
+                setUserId(response.userId);
+                setIsLoggedIn(true);
+                setError(null);
+            } else {
+                setError(response.message);
+                throw new Error(response.message);
+            }
         } catch (error) {
-            throw new Error("Invalid credentials");
+            setError(
+                error instanceof Error ? error.message : "An error occurred"
+            );
+            throw error;
         }
     };
 
-    const logout = async () => {};
+    const logout = async () => {
+        setUserId("");
+        setIsLoggedIn(false);
+        setError(null);
+    };
 
     return (
         <AuthContext.Provider
-            value={{ userId, isLoggedIn, login, register, logout }}>
+            value={{ userId, isLoggedIn, error, login, register, logout }}>
             {children}
         </AuthContext.Provider>
     );

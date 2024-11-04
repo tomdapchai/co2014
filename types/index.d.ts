@@ -3,8 +3,8 @@ export interface EventView {
     id: string;
     title: string;
     logo: string;
-    start: Date;
-    end: Date;
+    start: string;
+    end: string;
     location: string;
     attendees: number;
     byUser: {
@@ -24,7 +24,7 @@ export interface TicketDetail {
     ticketName: string;
     ticketPrice: number;
     ticketDescription?: string;
-    ticketAmount: number;
+    ticketQuantity: number;
 }
 
 export interface EventData {
@@ -41,6 +41,7 @@ export interface EventData {
     tickets?: TicketDetail[];
     maxTicketsPerUser: number;
     registrations: Registration[]; // for storing registrations
+    byUser: string;
 }
 
 export interface Registration {

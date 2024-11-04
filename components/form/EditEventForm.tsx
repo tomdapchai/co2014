@@ -365,7 +365,7 @@ const EditEventForm = ({ eventData, onSubmit }: EditEventFormProps) => {
                                             />
                                             <FormField
                                                 control={form.control}
-                                                name={`tickets.${index}.ticketAmount`}
+                                                name={`tickets.${index}.ticketQuantity`}
                                                 render={({ field }) => (
                                                     <FormItem className="w-full">
                                                         <FormControl className="w-full  flex justify-between items-center">
@@ -378,7 +378,7 @@ const EditEventForm = ({ eventData, onSubmit }: EditEventFormProps) => {
                                                                     control={
                                                                         form.control
                                                                     }
-                                                                    name={`tickets.${index}.ticketAmount`}
+                                                                    name={`tickets.${index}.ticketQuantity`}
                                                                     min={1}
                                                                     defaultValue={
                                                                         1
@@ -436,8 +436,8 @@ const EditEventForm = ({ eventData, onSubmit }: EditEventFormProps) => {
                                                 price={form.getValues(
                                                     `tickets.${index}.ticketPrice`
                                                 )}
-                                                amount={form.getValues(
-                                                    `tickets.${index}.ticketAmount`
+                                                quantity={form.getValues(
+                                                    `tickets.${index}.ticketQuantity`
                                                 )}
                                                 description={form.getValues(
                                                     `tickets.${index}.ticketDescription`
@@ -490,7 +490,7 @@ const EditEventForm = ({ eventData, onSubmit }: EditEventFormProps) => {
                                         ticketName: "",
                                         ticketPrice: 1,
                                         ticketDescription: "",
-                                        ticketAmount: 1,
+                                        ticketQuantity: 1,
                                     })
                                 }>
                                 Add Ticket

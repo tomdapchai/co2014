@@ -22,7 +22,7 @@ const ticketDetailSchema = z.object({
     ticketName: z.string().min(3).max(50),
     ticketPrice: z.number().int().nonnegative(),
     ticketDescription: z.optional(z.string().max(200)),
-    ticketAmount: z.number().positive(),
+    ticketQuantity: z.number().positive(),
 });
 
 export const createEventSchema = z
@@ -59,6 +59,7 @@ export const createEventSchema = z
         ticketType: z.enum(["free", "paid"]),
         tickets: z.optional(z.array(ticketDetailSchema)),
         maxTicketsPerUser: z.number().int().positive(),
+        byUser: z.string(),
     })
     .refine((data) => new Date(data.start) <= new Date(data.end), {
         message: "End datetime must be after start datetime",
@@ -75,8 +76,8 @@ export const createEventSchema = z
                         ticket.ticketName.length >= 3 &&
                         (typeof ticket.ticketDescription === "undefined" ||
                             ticket.ticketDescription.length <= 200) &&
-                        typeof ticket.ticketAmount === "number" &&
-                        ticket.ticketAmount > 0
+                        typeof ticket.ticketQuantity === "number" &&
+                        ticket.ticketQuantity > 0
                     );
                 }) &&
                 // Check for distinct ticket names
@@ -85,4 +86,33 @@ export const createEventSchema = z
             );
         }
         return true; // For free tickets, auto passed checking
+    })
+    .refine((data) => {
+        if (typeof data.capacity === "number" && Array.isArray(data.tickets)) {
+            return (
+                data.capacity > data.maxTicketsPerUser &&
+                data.tickets?.reduce(
+                    (acc, ticket) => acc + ticket.ticketQuantity,
+                    0
+                ) <= data.capacity
+            );
+        }
+        if (typeof data.capacity === "number") {
+            return data.capacity > data.maxTicketsPerUser;
+        }
+        return true;
     });
+
+//for events that have many types of tickets
+const multiTypeSchema = z.object({
+    name: z.string(),
+    price: z.number().int().nonnegative(),
+    quantity: z.number().int().nonnegative(),
+});
+
+// this is for sending the registration data to the server, then id allocates for each ticket/registration will be perform here i guess
+export const registerEventSchema = z.object({
+    eventId: z.string(),
+    defaultQuantity: z.number().int().nonnegative(),
+    multiType: z.array(multiTypeSchema),
+});

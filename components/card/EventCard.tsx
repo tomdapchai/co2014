@@ -10,13 +10,13 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "../ui/button";
-
+import { formatDuration } from "@/lib/utils";
 interface Props {
     id: string;
     title: string;
     logo: string;
-    start: Date;
-    end: Date;
+    start: string;
+    end: string;
     location: string;
     attendees: number;
     byUser: {
@@ -49,32 +49,7 @@ const EventCard = ({
                         </CardHeader>
                         <CardContent className="flex justify-between items-center pb-2">
                             <CardDescription className="flex flex-col justify-between gap-1">
-                                <p className="text-lg">
-                                    {start.getDate() === end.getDate()
-                                        ? `${start.toDateString()} ${start.toLocaleTimeString(
-                                              [],
-                                              {
-                                                  hour: "2-digit",
-                                                  minute: "2-digit",
-                                              }
-                                          )} - ${end.toLocaleTimeString([], {
-                                              hour: "2-digit",
-                                              minute: "2-digit",
-                                          })}`
-                                        : `${start.toDateString()} ${start.toLocaleTimeString(
-                                              [],
-                                              {
-                                                  hour: "2-digit",
-                                                  minute: "2-digit",
-                                              }
-                                          )} - ${end.toDateString()} ${end.toLocaleTimeString(
-                                              [],
-                                              {
-                                                  hour: "2-digit",
-                                                  minute: "2-digit",
-                                              }
-                                          )}`}
-                                </p>
+                                <p>{formatDuration(start, end)}</p>
                                 <p className="text-base">{location}</p>
                                 {isHost ? (
                                     <p className="text-base">

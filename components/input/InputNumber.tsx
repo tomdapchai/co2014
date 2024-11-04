@@ -11,6 +11,7 @@ interface InputNumberProps extends Omit<InputProps, "value" | "onChange"> {
     max?: number;
     step?: number;
     extraClass?: string;
+    onChange?: (value: number) => void;
 }
 
 const InputNumber = ({
@@ -75,7 +76,7 @@ const InputNumber = ({
                 type="button"
                 variant="ghost"
                 onClick={handleDecrement}
-                className="rounded-full">
+                className="rounded-full p-0">
                 -
             </Button>
             <Input
@@ -95,7 +96,7 @@ const InputNumber = ({
                 type="button"
                 variant="ghost"
                 onClick={handleIncrement}
-                className="rounded-full">
+                className="rounded-full p-0">
                 +
             </Button>
         </div>

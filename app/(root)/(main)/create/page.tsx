@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
 import { createEventSchema } from "@/lib/validation";
-
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
     Form,
@@ -34,13 +34,14 @@ import TicketCard from "@/components/card/TicketCard";
 import LogoUpload from "@/components/input/LogoUpload";
 import SelectForm from "@/components/input/SelectForm";
 import InputDateTime from "@/components/input/InputDateTime";
+import { createEvent } from "@/lib/actions/event.action";
 
 const Page = () => {
     // mock eventId
-    const eventId = "1234";
     // mock user already set payment method to receive payment
     const hasPaymentMethod = true;
 
+    const { userId } = useAuth();
     // hooks
     const router = useRouter();
     const pathname = usePathname();
@@ -73,6 +74,7 @@ const Page = () => {
             ticketType: "free",
             tickets: [],
             maxTicketsPerUser: 1,
+            byUser: userId,
         },
     });
 
@@ -102,13 +104,20 @@ const Page = () => {
             ) {
                 data.ticketType = "free";
             }
-            // make async call to create event
-            // contain all form data
+            // make async call to create event, contain all form data
             // navigate to event page
-            console.log(data);
 
-            /* const {eventId} = await axios.post("/api/event", data);
-            router.push(`/manage/${eventId}`); */
+            /* await createEvent(data).then((res) => {
+                if (res) {
+                    if (res.success) {
+                        router.push(`/event/${res.eventId}`);
+                    }
+                } else {
+                    //throw new Error("Failed to create event");
+                }
+            }); */
+
+            console.log(data);
         } catch (error) {
             console.log(data.start);
             console.error(error);
@@ -515,7 +524,7 @@ const Page = () => {
                                                                 control={
                                                                     form.control
                                                                 }
-                                                                name={`tickets.${index}.ticketAmount`}
+                                                                name={`tickets.${index}.ticketQuantity`}
                                                                 render={({
                                                                     field,
                                                                 }) => (
@@ -530,7 +539,7 @@ const Page = () => {
                                                                                     control={
                                                                                         form.control
                                                                                     }
-                                                                                    name={`tickets.${index}.ticketAmount`}
+                                                                                    name={`tickets.${index}.ticketQuantity`}
                                                                                     min={
                                                                                         1
                                                                                     }
@@ -600,8 +609,8 @@ const Page = () => {
                                                                 price={form.getValues(
                                                                     `tickets.${index}.ticketPrice`
                                                                 )}
-                                                                amount={form.getValues(
-                                                                    `tickets.${index}.ticketAmount`
+                                                                quantity={form.getValues(
+                                                                    `tickets.${index}.ticketQuantity`
                                                                 )}
                                                                 description={form.getValues(
                                                                     `tickets.${index}.ticketDescription`
@@ -664,7 +673,7 @@ const Page = () => {
                                                         ticketName: "",
                                                         ticketPrice: 1,
                                                         ticketDescription: "",
-                                                        ticketAmount: 1,
+                                                        ticketQuantity: 1,
                                                     })
                                                 }>
                                                 Add Ticket

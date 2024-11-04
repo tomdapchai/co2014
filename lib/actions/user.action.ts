@@ -11,6 +11,6 @@ export const cancelRegistration = async (eventId: string, userId: string) => {};
 export const getRegisteredEvents = async (userId: string) => {};
 
 // with personal
-export const getPersonalData = async (userId: string) => {};
+export const getUserData = async (userId: string) => {};
 
-export const updatePersonalData = async (userId: string, userData: any) => {};
+export const updateUserData = async (userId: string, userData: any) => {};

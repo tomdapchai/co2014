@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
 import { EventData } from "@/types";
-
+import { useAuth } from "./AuthContext";
 interface EventContextType {
     eventData: EventData | null;
     updateEventData: (data: EventData) => Promise<void>;
@@ -26,6 +26,7 @@ interface EventProviderProps {
 export const EventProvider = ({ children, eventId }: EventProviderProps) => {
     const [eventData, setEventData] = useState<EventData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const { userId } = useAuth();
 
     const fetchEventData = async () => {
         setIsLoading(true);
@@ -71,17 +72,18 @@ export const EventProvider = ({ children, eventId }: EventProviderProps) => {
                         ticketName: "Free",
                         ticketPrice: 0,
                         ticketDescription: "Free tickets for everyone",
-                        ticketAmount: 10,
+                        ticketQuantity: 10,
                     },
                     {
                         ticketName: "VIP",
                         ticketPrice: 10000,
                         ticketDescription: "Vip ticket for riches",
-                        ticketAmount: 9,
+                        ticketQuantity: 9,
                     },
                 ],
                 maxTicketsPerUser: 10,
                 registrations: [],
+                byUser: userId,
             });
 
             console.log("Fetched", eventData);
@@ -124,7 +126,7 @@ export const EventProvider = ({ children, eventId }: EventProviderProps) => {
                     `INSERT INTO tickets (event_id, name, price, description, amount) 
                      VALUES (?, ?, ?, ?, ?)`,
                     [eventId, ticket.ticketName, ticket.ticketPrice, 
-                     ticket.ticketDescription, ticket.ticketAmount]
+                     ticket.ticketDescription, ticket.ticketQuantity]
                 );
             }
             */

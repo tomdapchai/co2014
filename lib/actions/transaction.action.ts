@@ -1,6 +1,6 @@
 import pool from "../mysql";
 
-const createTransaction = async (transactionData: any) => {
+export const createTransaction = async (transactionData: any) => {
     /* const { userId, eventId, amount, paymentMethod } = transactionData;
   const query = `INSERT INTO transactions (userId, eventId, amount, paymentMethod) VALUES (${userId}, ${eventId}, ${amount}, ${paymentMethod})`;
   try {
@@ -12,4 +12,4 @@ const createTransaction = async (transactionData: any) => {
   } */
 };
 
-const getTransactions = async (userId: string) => {};
+export const getTransactions = async (userId: string) => {};

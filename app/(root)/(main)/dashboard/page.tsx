@@ -4,6 +4,7 @@ import EventCard from "@/components/card/EventCard";
 import NoResult from "@/components/NoResult";
 import { Button } from "@/components/ui/button";
 import { EventView } from "@/types";
+import { getRegisteredEvents } from "@/lib/actions/user.action";
 const Page = () => {
     const userId = "1";
     const [eventView, setEventView] = useState("upcoming");
@@ -12,13 +13,14 @@ const Page = () => {
     const [filteredEvents, setFilteredEvents] = useState<EventView[]>([]);
     // mock events data
     useEffect(() => {
+        //await getRegisteredEvents(userId).then((data) => {setEvents(data);});
         const mockEvents: EventView[] = [
             {
                 id: "1",
                 title: "Event 1",
                 logo: "/assets/eventLogo.png",
-                start: new Date("2024-09-01T10:00:00"),
-                end: new Date("2024-09-01T12:00:00"),
+                start: "2024-09-01T10:00",
+                end: "2024-09-01T12:00",
                 location: "Ho Chi Minh City",
                 attendees: 100,
                 byUser: {
@@ -31,8 +33,8 @@ const Page = () => {
                 id: "2",
                 title: "Event 2",
                 logo: "/assets/eventLogo.png",
-                start: new Date("2024-09-02T10:00:00"),
-                end: new Date("2024-09-02T12:00:00"),
+                start: "2024-09-02T10:00",
+                end: "2024-09-02T12:00",
                 location: "Da Nang City",
                 attendees: 200,
                 byUser: {
@@ -45,8 +47,8 @@ const Page = () => {
                 id: "3",
                 title: "Event 3",
                 logo: "/assets/eventLogo.png",
-                start: new Date("2024-09-03T10:00:00"),
-                end: new Date("2024-09-03T12:00:00"),
+                start: "2024-09-03T10:00",
+                end: "2024-09-03T12:00",
                 location: "Ha Noi City",
                 attendees: 300,
                 byUser: {
@@ -59,8 +61,8 @@ const Page = () => {
                 id: "4",
                 title: "Event 4",
                 logo: "/assets/eventLogo.png",
-                start: new Date("2025-11-01T10:00:00"),
-                end: new Date("2025-11-03T12:00:00"),
+                start: "2025-11-01T10:00",
+                end: "2025-11-03T12:00",
                 location: "Da Lat City",
                 attendees: 400,
                 byUser: {
@@ -73,8 +75,8 @@ const Page = () => {
                 id: "5",
                 title: "Event 5",
                 logo: "/assets/eventLogo.png",
-                start: new Date("2024-09-03T10:00:00"),
-                end: new Date("2024-09-03T12:00:00"),
+                start: "2024-09-03T10:00",
+                end: "2024-09-03T12:00",
                 location: "Ha Noi City",
                 attendees: 300,
                 byUser: {
@@ -87,8 +89,8 @@ const Page = () => {
                 id: "6",
                 title: "Event 6",
                 logo: "/assets/eventLogo.png",
-                start: new Date("2024-12-03T10:00:00"),
-                end: new Date("2024-12-03T12:00:00"),
+                start: "2024-12-03T10:00",
+                end: "2024-12-03T12:00",
                 location: "Ha Noi City",
                 attendees: 300,
                 byUser: {
@@ -101,8 +103,8 @@ const Page = () => {
                 id: "7",
                 title: "Event 7",
                 logo: "/assets/eventLogo.png",
-                start: new Date("2024-09-03T10:00:00"),
-                end: new Date("2024-09-03T12:00:00"),
+                start: "2024-09-03T10:00",
+                end: "2024-09-03T12:00",
                 location: "Ha Noi City",
                 attendees: 300,
                 byUser: {
@@ -120,13 +122,13 @@ const Page = () => {
         const now = new Date();
         const filtered = events.filter((event) => {
             return eventView === "upcoming"
-                ? event.start > now
-                : event.end < now;
+                ? new Date(event.start) > now
+                : new Date(event.end) < now;
         });
         filtered.sort((a, b) =>
             eventView === "upcoming"
-                ? a.start.getTime() - b.start.getTime()
-                : b.start.getTime() - a.start.getTime()
+                ? new Date(a.start).getTime() - new Date(b.start).getTime()
+                : new Date(b.start).getTime() - new Date(a.start).getTime()
         );
         setFilteredEvents(filtered);
     }, [eventView, events]);
@@ -166,7 +168,7 @@ const Page = () => {
                             key={index}
                             className="flex justify-between items-center gap-20">
                             <p className="whitespace-nowrap font-bold">
-                                {event.start.toLocaleDateString()}
+                                {new Date(event.start).toLocaleDateString()}
                             </p>
                             <EventCard {...event} currentUserId={userId} />
                         </div>

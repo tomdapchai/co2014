@@ -4,14 +4,14 @@ import { Ticket, DollarSign, Hash } from "lucide-react";
 interface Props {
     name: string;
     price: number;
-    amount: number;
+    quantity: number;
     description?: string;
 }
 
 const TicketCard = ({
     name,
     price,
-    amount,
+    quantity,
     description = "Enjoy an unforgettable night with premium seating and exclusive backstage access.",
 }: Props) => {
     const formatPrice = (price: number): string => {
@@ -32,7 +32,7 @@ const TicketCard = ({
     return (
         <Card className="w-full max-w-sm mx-auto bg-gradient-to-br from-primary/10 to-secondary/10 overflow-hidden">
             <CardHeader
-                className={`p-4 flex flex-row items-center justify-between ${getHeaderClass(
+                className={`p-4 flex flex-row items-center justify-between space-x-4 ${getHeaderClass(
                     price
                 )}`}>
                 <div className="flex items-center space-x-2">
@@ -53,7 +53,7 @@ const TicketCard = ({
                         <h3 className="text-xl font-bold truncate">{name}</h3>
                         <div className="flex items-center space-x-1 text-sm text-muted-foreground">
                             <Hash className="h-4 w-4" />
-                            <span>{amount}</span>
+                            <span>{quantity}</span>
                         </div>
                     </div>
                     <p className="text-sm text-muted-foreground line-clamp-3">
