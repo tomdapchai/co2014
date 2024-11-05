@@ -28,6 +28,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { registerEventSchema } from "@/lib/validation";
 import InputNumber from "@/components/input/InputNumber";
 import TicketCard from "@/components/card/TicketCard";
+import { getData } from "@/lib/actions/test.action";
 // There will be following actions from user: registerEvent, cancelRegistration used here
 
 const page = ({ params }: { params: { eventId: string } }) => {
@@ -172,8 +173,15 @@ const page = ({ params }: { params: { eventId: string } }) => {
         // create new transaction to DB, has transactionId, navigate to /transaction/${transactionId}
         // handle logic
         setIsRegistering(true);
+
         try {
             console.log(data);
+            await getData();
+            /* if (!isPaidEvent) {
+                if (data.defaultQuantity > 0) {
+                    await registerEvent(data, userId);
+                }
+            } */
             /*
             if (!isPaidEvent) {
                 if (data.quantity > 0) {
@@ -204,6 +212,7 @@ const page = ({ params }: { params: { eventId: string } }) => {
                     // what stuck here is how can i make the transaction of user pending while they are paying, and mark as registered successfully after they paid in this page (reload again? could be a solution)
                     // user have to pay in a window of like 10min (there should be something to handle this, else i just use a button cancel instead), if not then transaction is mark as cancelled (status==cancelled). Idk if i should get a temporary timeLeft for a transaction, seems hard to implement. Might just go with manual cancel button.
                     // transaction not only event paying, there would be advertise too, need to think more about this.
+                    // idea: give header for description: event pay or advertise pay, then display all info in transaction page
                     }
                 else {
                 proceed to registerEvent with registeredTickets

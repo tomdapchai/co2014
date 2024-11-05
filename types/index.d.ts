@@ -52,3 +52,14 @@ export interface Registration {
     status?: "pending" | "approved" | "rejected";
     hasChekedIn: boolean;
 }
+
+interface multiType {
+    name: string;
+    price: number;
+    quantity: number;
+}
+export interface RegistrationData {
+    eventId: string;
+    defaultQuantity: number;
+    multiType: multiType[];
+}

@@ -11,8 +11,8 @@ export async function createEvent(
     data: EventData
 ): Promise<createEventMessage | undefined> {
     return;
-    /* const { name, date, location, description } = data;
-    const query = `INSERT INTO events (name, date, location, description) VALUES (${name}, ${date}, ${location}, ${description})`;
+    /* const { name, type, logo, start, end, location, guideline, description, capacity, ticketType, tickets, maxRegisterPerUser } = data;
+    const query = `INSERT INTO event (name, type, logo, start, end, location, description) VALUES (${name}, ${date}, ${location}, ${description})`;
     try {
         await pool.query(query);
         return { success: true };

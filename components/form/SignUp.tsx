@@ -24,6 +24,7 @@ import { useForm } from "react-hook-form";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import Link from "next/link";
+import { registerUser } from "@/lib/actions/auth.action";
 
 const SignUp = () => {
     const router = useRouter();
@@ -40,6 +41,9 @@ const SignUp = () => {
 
     async function onSubmit(values: z.infer<typeof SignUpSchema>) {
         // push to DB the credentials
+        try {
+            await registerUser(values.email, values.password).then(() => {});
+        } catch (error) {}
     }
 
     return (

@@ -14,9 +14,9 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en" className="no-scrollbar">
-            <AuthProvider>
-                <body className="">{children}</body>
-            </AuthProvider>
+            <body className="">
+                <AuthProvider>{children}</AuthProvider>
+            </body>
         </html>
     );
 }

@@ -44,8 +44,14 @@ const SignIn = () => {
     async function onSubmit(values: z.infer<typeof SignInSchema>) {
         // do validation here
         try {
-            await login(values.email, values.password);
-            setIsLoggedInSuccess(true);
+            // encrypt password before sending
+            /* await login(values.email, values.password).then((res) => {
+                if (res.status === 'success') {
+                    setIsLoggedInSuccess(true);
+                } else {
+                    setIsLoggedInSuccess(false);
+                }
+            }); */
         } catch (error) {
             console.error(error);
             setIsLoggedInSuccess(false);
