@@ -63,3 +63,21 @@ export interface RegistrationData {
     defaultQuantity: number;
     multiType: multiType[];
 }
+
+export type Product = {
+    name: string;
+    price: number;
+    quantity?: number;
+    duration?: string;
+};
+export interface TransactionData {
+    eventId: string; // to know which event the transaction is for (ticket or advertisement)
+    // if type is ticket then use byUser when get event data, and display payment info
+    userId: string; // to know who gonna pay the transaction
+    type: "ticket" | "advertisement";
+    products: Product[];
+}
+
+// transaction logic: user pay, click proceed, transaction status still pending. Host check if the user already sent => go to management to approve the payment.
+// After 24hrs, the transaction will be automatically approved.
+// If user decide to cancel the payment, status would remain "canceled" 4ever.
