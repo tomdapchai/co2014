@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Ticket, DollarSign, Hash } from "lucide-react";
-
+import { formatPrice } from "@/lib/utils";
 interface Props {
     name: string;
     price: number;
@@ -14,16 +14,6 @@ const TicketCard = ({
     quantity,
     description = "Enjoy an unforgettable night with premium seating and exclusive backstage access.",
 }: Props) => {
-    const formatPrice = (price: number): string => {
-        return price > 0
-            ? price.toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "VND",
-                  currencyDisplay: "code",
-              })
-            : "Free";
-    };
-
     const getHeaderClass = (price: number) => {
         return price > 0
             ? "bg-gradient-to-r from-yellow-300 to-yellow-500"

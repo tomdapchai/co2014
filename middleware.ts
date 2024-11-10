@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-/* export function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
     // Check if the request is for the root URL
     if (request.nextUrl.pathname === "/") {
         const dashboardUrl = new URL("/dashboard", request.url); // Redirect URL
@@ -16,6 +16,6 @@ import type { NextRequest } from "next/server";
 // Define which routes the middleware should apply to
 export const config = {
     matcher: "/", // Only match the root URL
-}; */
+};
 
-export default function middleware(req: NextRequest) {}
+/* export default function middleware(req: NextRequest) {} */

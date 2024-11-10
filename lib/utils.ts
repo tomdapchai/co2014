@@ -56,3 +56,13 @@ export const formatDuration = (start: string, end: string) => {
         startDate
     )} - ${getDayDescription(endDate)} ${formatTime(endDate)}`;
 };
+
+export const formatPrice = (price: number): string => {
+    return price > 0
+        ? price.toLocaleString("en-US", {
+              style: "currency",
+              currency: "VND",
+              currencyDisplay: "code",
+          })
+        : "Free";
+};

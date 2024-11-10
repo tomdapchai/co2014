@@ -170,7 +170,7 @@ const page = ({ params }: { params: { eventId: string } }) => {
     async function onSubmit(data: z.infer<typeof registerEventSchema>) {
         // send registered tickets to event
         // this is complicated, as paid tickets need to be paid first, by transaction system (i have no idea)
-        // create new transaction to DB, has transactionId, navigate to /transaction/${transactionId}
+        // create new transaction to DB, has transactionId, navigate to /checkout/${transactionId}
         // handle logic
         setIsRegistering(true);
 
@@ -191,7 +191,7 @@ const page = ({ params }: { params: { eventId: string } }) => {
             } else {
                 // handle paid event
                 // create transaction
-                // navigate to /transaction/${transactionId}
+                // navigate to /checkout/${transactionId}
 
 
                 const { multiType, ...rest } = data;
@@ -240,7 +240,7 @@ const page = ({ params }: { params: { eventId: string } }) => {
     }
 
     return (
-        <div className="flex w-full gap-10 justify-center items-start">
+        <div className="flex w-full gap-10 justify-center items-start pb-6">
             <div className="flex flex-col justify-start items-start space-y-4">
                 <Image
                     src={eventData ? eventData.logo : "/assets/eventLogo.png"}

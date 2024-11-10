@@ -131,7 +131,7 @@ const Page = () => {
         <Form {...form}>
             <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="flex w-full gap-10 justify-center items-start">
+                className="flex w-full gap-10 justify-center items-start pb-6">
                 <LogoUpload
                     control={form.control}
                     name="logo"
