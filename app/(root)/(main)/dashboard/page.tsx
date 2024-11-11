@@ -5,12 +5,14 @@ import NoResult from "@/components/NoResult";
 import { Button } from "@/components/ui/button";
 import { EventView } from "@/types";
 import { getRegisteredEvents } from "@/lib/actions/user.action";
+import { useAuth } from "@/context/AuthContext";
 const Page = () => {
-    const userId = "1";
+    const { userId } = useAuth();
     const [eventView, setEventView] = useState("upcoming");
     // events array to store events according to the state (upcoming or past) to display later
     const [events, setEvents] = useState<EventView[]>([]);
     const [filteredEvents, setFilteredEvents] = useState<EventView[]>([]);
+    console.log("UserId: ", userId);
     // mock events data
     useEffect(() => {
         //await getRegisteredEvents(userId).then((data) => {setEvents(data);});

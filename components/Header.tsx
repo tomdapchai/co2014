@@ -13,12 +13,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { notificationProps } from "@/types";
 import Image from "next/image";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 const Header = () => {
     const [notifications, setNotifications] = useState<notificationProps[]>([]);
     const [currentTime, setCurrentTime] = useState("");
-    // mock userId
-    const userId = "1";
+    const router = useRouter();
+    const { userId, logout } = useAuth();
 
     useEffect(() => {
         // fetch notifications from the server
@@ -59,7 +61,16 @@ const Header = () => {
         };
     }, []);
 
-    const handleLogout = () => {};
+    const handleLogout = async () => {
+        await logout()
+            .then(() => {
+                router.push("/");
+                console.log("Logged out");
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    };
 
     return (
         <header className="flex justify-between items-center py-5 px-5 w-full sticky top-0 left-0 z-50 backdrop-blur-md">

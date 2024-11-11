@@ -1,10 +1,10 @@
 "use server";
 
 import pool from "../mysql";
-import { RowDataPacket } from "mysql2";
-
+import { RowDataPacket, ResultSetHeader } from "mysql2";
 //https://sidorares.github.io/node-mysql2/docs
-
+var bcrypt = require("bcryptjs");
+var salt = bcrypt.genSaltSync(10);
 // Define types for our responses
 export type AuthResponse = {
     success: boolean;
@@ -13,15 +13,15 @@ export type AuthResponse = {
 };
 
 export async function loginUser(
-    email: string,
+    username: string,
     password: string
 ): Promise<AuthResponse> {
     try {
         // mock code, just the skeleton, idk how to use tho
 
         const [rows] = await pool.execute<RowDataPacket[]>(
-            "SELECT * FROM user WHERE email = ?",
-            [email]
+            "SELECT * FROM user WHERE username = ?",
+            [username]
         );
 
         if (rows.length === 0) {
@@ -30,11 +30,11 @@ export async function loginUser(
                 message: "User not found",
             };
         }
-
         const user = rows[0];
+        console.log("User:", user);
 
         // TODO: Replace with proper password comparison using bcrypt or similar
-        if (user.password !== password) {
+        if (!bcrypt.compareSync(password, user.password)) {
             return {
                 success: false,
                 message: "Invalid password",
@@ -44,7 +44,7 @@ export async function loginUser(
         return {
             success: true,
             message: "Login successful",
-            userId: user.id.toString(),
+            userId: user.ID_user.toString(),
         };
     } catch (error) {
         console.error("Login error:", error);
@@ -56,14 +56,14 @@ export async function loginUser(
 }
 
 export async function registerUser(
-    email: string,
+    username: string,
     password: string
 ): Promise<AuthResponse> {
     try {
         // Check if user already exists
         const [existingUsers] = await pool.execute<RowDataPacket[]>(
-            "SELECT * FROM users WHERE email = ?",
-            [email]
+            "SELECT * FROM user WHERE username = ?",
+            [username]
         );
 
         if (existingUsers.length > 0) {
@@ -73,12 +73,15 @@ export async function registerUser(
             };
         }
 
+        const hashPassword = bcrypt.hashSync(password, salt);
+
         // Insert new user
-        const [result] = await pool.execute(
-            "INSERT INTO users (email, password) VALUES (?, ?)",
-            [email, password] // TODO: Hash password before storing
+        const [result] = await pool.execute<ResultSetHeader>(
+            "INSERT INTO user (username, password) VALUES (?, ?)",
+            [username, hashPassword] // TODO: Hash password before storing
         );
 
+        console.log("Registration result:", result);
         // TypeScript type assertion for the result
         const { insertId } = result as { insertId: number };
 

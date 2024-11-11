@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 import {
     registerEvent,
     cancelRegistration,
@@ -29,6 +30,8 @@ import { registerEventSchema } from "@/lib/validation";
 import InputNumber from "@/components/input/InputNumber";
 import TicketCard from "@/components/card/TicketCard";
 import { getData } from "@/lib/actions/test.action";
+import { get } from "http";
+import { Card, CardContent, CardDescription } from "@/components/ui/card";
 // There will be following actions from user: registerEvent, cancelRegistration used here
 
 const page = ({ params }: { params: { eventId: string } }) => {
@@ -37,11 +40,12 @@ const page = ({ params }: { params: { eventId: string } }) => {
     const [eventData, setEventData] = useState<EventData>();
     const [isRegistering, setIsRegistering] = useState(false);
     const [isPaidEvent, setIsPaidEvent] = useState(false);
-
+    const [isAvailable, setIsAvailable] = useState(false);
     // for caculating capacity left
     const [capacityLeft, setCapacityLeft] = useState<number>();
     // for caculating how many tickets each type left if there are multiple ticket types
     const [ticketLeft, setTicketLeft] = useState<Record<string, number>>({});
+    const router = useRouter();
     // Example Usage:
     /* setTicketLeft((prev) => ({ ...prev, vip1: 3 }));
 
@@ -53,16 +57,24 @@ const page = ({ params }: { params: { eventId: string } }) => {
     // would contains all user info, would define interface later
 
     useEffect(() => {
-        /* await getEventData(eventId).then((data) => {
-            if (data) {
-                setEventData(data);
-            } else {
-                // return 404 page
+        const getData = async () => {
+            try {
+                const data = await getEventData(eventId);
+                if ("error" in data) {
+                    console.error(data.error);
+                    // Route to the not-found page
+                    router.push("/not-found");
+                } else {
+                    setEventData(data);
+                }
+            } catch (err) {
+                console.log(err);
             }
-        }); */
-        //const user = getUserData(userId);
-        //mock data
-        setEventData({
+        };
+
+        getData();
+
+        /* setEventData({
             name: "test",
             logo: "/assets/eventLogo.png",
             type: "public",
@@ -90,16 +102,27 @@ const page = ({ params }: { params: { eventId: string } }) => {
             maxTicketsPerUser: 10,
             registrations: [],
             byUser: "1234",
-        });
+        }); */
     }, []);
 
     useEffect(() => {
+        if (eventData) {
+            const now = new Date();
+            if (now < new Date(eventData.start)) {
+                console.log("Event has not started yet");
+                setIsAvailable(true);
+            } else {
+                console.log("Event has started or ended");
+                setIsAvailable(false);
+            }
+        }
+
         if (eventData?.ticketType === "paid") {
             setIsPaidEvent(true);
         }
         // set capacity left
-        if (eventData) {
-            if (typeof eventData.capacity === "string") {
+        if (eventData && eventData.registrations) {
+            if (eventData.capacity === 0) {
                 // if capacity is unlimited
                 setCapacityLeft(Number.MAX_SAFE_INTEGER);
             } else {
@@ -118,11 +141,12 @@ const page = ({ params }: { params: { eventId: string } }) => {
             });
 
             // reduce ticket quantity by registered tickets with type "paid", comparing ticketName
-            eventData.registrations.forEach((registration) => {
-                if (registration.type === "paid") {
-                    ticketLeft[registration.ticketName as string]--;
-                }
-            });
+            if (eventData.registrations)
+                eventData.registrations.forEach((registration) => {
+                    if (registration.type === "paid") {
+                        ticketLeft[registration.ticketName as string]--;
+                    }
+                });
             setTicketLeft(ticketLeft);
         }
 
@@ -235,8 +259,11 @@ const page = ({ params }: { params: { eventId: string } }) => {
     }
 
     if (!eventData) {
-        // gonna do loading component for fun
-        return <div>Loading...</div>;
+        return (
+            <div className="absolute inset-0 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-20 w-20 border-b-2 border-gray-900" />
+            </div>
+        );
     }
 
     return (
@@ -295,138 +322,170 @@ const page = ({ params }: { params: { eventId: string } }) => {
                 )}
                 <div className="flex flex-col space-y-2">
                     {/* register form here, after registered quantity is lowered */}
-                    <p className="text-xl font-bold">Register</p>
-                    <Form {...form}>
-                        <form
-                            onSubmit={form.handleSubmit(onSubmit)}
-                            className="w-full flex flex-col justify-center items-start p-4 backdrop-blur-xl bg-white/30 shadow-xl rounded-xl ">
-                            {!isPaidEvent ? (
-                                <div className="w-full flex justify-between">
-                                    <FormItem>
-                                        <FormLabel>
+                    {isAvailable ? (
+                        <>
+                            <p className="text-xl font-bold">Register</p>
+                            <Form {...form}>
+                                <form
+                                    onSubmit={form.handleSubmit(onSubmit)}
+                                    className="w-full flex flex-col justify-center items-start p-4 backdrop-blur-xl bg-white/30 shadow-xl rounded-xl ">
+                                    {!isPaidEvent ? (
+                                        <div className="w-full flex justify-between">
+                                            <FormItem>
+                                                <FormLabel>
+                                                    <p>
+                                                        How many tickets you
+                                                        want to register?
+                                                    </p>
+                                                    <FormControl>
+                                                        <InputNumber
+                                                            control={
+                                                                form.control
+                                                            }
+                                                            name="quantity"
+                                                            defaultValue={0}
+                                                            min={0}
+                                                            max={Math.min(
+                                                                capacityLeft
+                                                                    ? capacityLeft
+                                                                    : 0,
+                                                                eventData.maxTicketsPerUser
+                                                            )}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage className="text-red-500" />
+                                                </FormLabel>
+                                            </FormItem>
+                                        </div>
+                                    ) : (
+                                        <div className="w-full flex flex-col divide-y-[1px] divide-gray-400 space-y-2">
                                             <p>
-                                                How many tickets you want to
-                                                register?
+                                                Choose types of tickets you want
                                             </p>
-                                            <FormControl>
-                                                <InputNumber
+                                            {isPaidEventWithTickets(
+                                                eventData
+                                            ) && (
+                                                <FormField
                                                     control={form.control}
-                                                    name="quantity"
-                                                    defaultValue={0}
-                                                    min={0}
-                                                    max={Math.min(
-                                                        capacityLeft
-                                                            ? capacityLeft
-                                                            : 0,
-                                                        eventData.maxTicketsPerUser
+                                                    name="multiType"
+                                                    render={() => (
+                                                        <FormItem className="w-full flex flex-col space-y-2 divide-y-[1px] divide-gray-400">
+                                                            {fields.map(
+                                                                (_, index) => (
+                                                                    <div
+                                                                        key={
+                                                                            fields[
+                                                                                index
+                                                                            ].id
+                                                                        }
+                                                                        className="w-full flex justify-between">
+                                                                        <FormField
+                                                                            control={
+                                                                                form.control
+                                                                            }
+                                                                            name={`multiType.${index}.quantity`}
+                                                                            render={({
+                                                                                field,
+                                                                            }) => (
+                                                                                <FormItem className="w-full flex justify-between items-end py-4 space-x-4">
+                                                                                    <TicketCard
+                                                                                        name={
+                                                                                            eventData
+                                                                                                .tickets[
+                                                                                                index
+                                                                                            ]
+                                                                                                .ticketName
+                                                                                        }
+                                                                                        price={
+                                                                                            eventData
+                                                                                                .tickets[
+                                                                                                index
+                                                                                            ]
+                                                                                                .ticketPrice
+                                                                                        }
+                                                                                        quantity={
+                                                                                            ticketLeft[
+                                                                                                eventData
+                                                                                                    .tickets[
+                                                                                                    index
+                                                                                                ]
+                                                                                                    .ticketName
+                                                                                            ]
+                                                                                        }
+                                                                                        description={
+                                                                                            eventData
+                                                                                                .tickets[
+                                                                                                index
+                                                                                            ]
+                                                                                                .ticketDescription
+                                                                                        }
+                                                                                    />
+                                                                                    <div className="flex flex-col">
+                                                                                        <p>
+                                                                                            Amount
+                                                                                        </p>
+                                                                                        <InputNumber
+                                                                                            control={
+                                                                                                control
+                                                                                            }
+                                                                                            name={`multiType.${index}.quantity`}
+                                                                                            defaultValue={
+                                                                                                0
+                                                                                            }
+                                                                                            min={
+                                                                                                0
+                                                                                            }
+                                                                                            max={Math.min(
+                                                                                                ticketLeft[
+                                                                                                    eventData
+                                                                                                        .tickets[
+                                                                                                        index
+                                                                                                    ]
+                                                                                                        .ticketName
+                                                                                                ],
+                                                                                                eventData.maxTicketsPerUser
+                                                                                            )}
+                                                                                        />
+                                                                                        <FormMessage className="text-red-500" />
+                                                                                    </div>
+                                                                                </FormItem>
+                                                                            )}
+                                                                        />
+                                                                    </div>
+                                                                )
+                                                            )}
+                                                            <FormMessage className="text-red-500" />
+                                                        </FormItem>
                                                     )}
                                                 />
-                                            </FormControl>
-                                            <FormMessage className="text-red-500" />
-                                        </FormLabel>
-                                    </FormItem>
-                                </div>
-                            ) : (
-                                <div className="w-full flex flex-col divide-y-[1px] divide-gray-400 space-y-2">
-                                    <p>Choose types of tickets you want</p>
-                                    {isPaidEventWithTickets(eventData) && (
-                                        <FormField
-                                            control={form.control}
-                                            name="multiType"
-                                            render={() => (
-                                                <FormItem className="w-full flex flex-col space-y-2 divide-y-[1px] divide-gray-400">
-                                                    {fields.map((_, index) => (
-                                                        <div
-                                                            key={
-                                                                fields[index].id
-                                                            }
-                                                            className="w-full flex justify-between">
-                                                            <FormField
-                                                                control={
-                                                                    form.control
-                                                                }
-                                                                name={`multiType.${index}.quantity`}
-                                                                render={({
-                                                                    field,
-                                                                }) => (
-                                                                    <FormItem className="w-full flex justify-between items-end py-4 space-x-4">
-                                                                        <TicketCard
-                                                                            name={
-                                                                                eventData
-                                                                                    .tickets[
-                                                                                    index
-                                                                                ]
-                                                                                    .ticketName
-                                                                            }
-                                                                            price={
-                                                                                eventData
-                                                                                    .tickets[
-                                                                                    index
-                                                                                ]
-                                                                                    .ticketPrice
-                                                                            }
-                                                                            quantity={
-                                                                                ticketLeft[
-                                                                                    eventData
-                                                                                        .tickets[
-                                                                                        index
-                                                                                    ]
-                                                                                        .ticketName
-                                                                                ]
-                                                                            }
-                                                                            description={
-                                                                                eventData
-                                                                                    .tickets[
-                                                                                    index
-                                                                                ]
-                                                                                    .ticketDescription
-                                                                            }
-                                                                        />
-                                                                        <div className="flex flex-col">
-                                                                            <p>
-                                                                                Amount
-                                                                            </p>
-                                                                            <InputNumber
-                                                                                control={
-                                                                                    control
-                                                                                }
-                                                                                name={`multiType.${index}.quantity`}
-                                                                                defaultValue={
-                                                                                    0
-                                                                                }
-                                                                                min={
-                                                                                    0
-                                                                                }
-                                                                                max={Math.min(
-                                                                                    ticketLeft[
-                                                                                        eventData
-                                                                                            .tickets[
-                                                                                            index
-                                                                                        ]
-                                                                                            .ticketName
-                                                                                    ],
-                                                                                    eventData.maxTicketsPerUser
-                                                                                )}
-                                                                            />
-                                                                            <FormMessage className="text-red-500" />
-                                                                        </div>
-                                                                    </FormItem>
-                                                                )}
-                                                            />
-                                                        </div>
-                                                    ))}
-                                                    <FormMessage className="text-red-500" />
-                                                </FormItem>
                                             )}
-                                        />
+                                        </div>
                                     )}
-                                </div>
-                            )}
-                            <Button type="submit" disabled={isRegistering}>
-                                Register
-                            </Button>
-                        </form>
-                    </Form>
+                                    <Button
+                                        type="submit"
+                                        disabled={isRegistering}>
+                                        Register
+                                    </Button>
+                                </form>
+                            </Form>
+                        </>
+                    ) : (
+                        <>
+                            <p className="text-xl font-bold">
+                                Sorry, the event has ended
+                            </p>
+                            <Card
+                                title="Attendee"
+                                className="p-4 rounded-xl flex justify-center items-center mt-4">
+                                <CardContent className="flex justify-center items-center p-0">
+                                    <p>
+                                        {eventData?.registrations?.length}{" "}
+                                        attendees
+                                    </p>
+                                </CardContent>
+                            </Card>
+                        </>
+                    )}
                 </div>
 
                 <div className="text-lg">

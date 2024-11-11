@@ -35,7 +35,7 @@ const EditEventForm = ({ eventData, onSubmit }: EditEventFormProps) => {
     const [isPaid, setIsPaid] = useState(false);
 
     useEffect(() => {
-        if (eventData.capacity !== "unlimited") {
+        if (eventData.capacity != 0) {
             setIsLimited(true);
         }
 
@@ -231,13 +231,11 @@ const EditEventForm = ({ eventData, onSubmit }: EditEventFormProps) => {
                             { value: "limited", label: "Limited" },
                         ]}
                         defaultValue={
-                            eventData.capacity != "unlimited"
-                                ? "limited"
-                                : "unlimited"
+                            eventData.capacity != 0 ? "limited" : "unlimited"
                         }
                         onChange={(value) => {
                             if (value === "unlimited") {
-                                form.setValue("capacity", "unlimited");
+                                form.setValue("capacity", 0);
                             }
                             setIsLimited(value === "limited");
                         }}

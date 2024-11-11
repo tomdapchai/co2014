@@ -1,13 +1,13 @@
 import * as z from "zod";
 
 export const SignInSchema = z.object({
-    email: z.string().email(),
+    username: z.string(),
     password: z.string().min(8),
 });
 
 export const SignUpSchema = z
     .object({
-        email: z.string().email(),
+        username: z.string().min(5),
         password: z.string().min(8),
         confirmPassword: z.string().min(8),
     })
@@ -55,7 +55,7 @@ export const createEventSchema = z
         description: z.optional(z.string().max(3000)),
         location: z.string().min(3).max(200),
         guideline: z.optional(z.string().max(200)),
-        capacity: z.union([z.string(), z.number().int().positive()]),
+        capacity: z.number().int().nonnegative(),
         ticketType: z.enum(["free", "paid"]),
         tickets: z.optional(z.array(ticketDetailSchema)),
         maxTicketsPerUser: z.number().int().positive(),
@@ -88,7 +88,7 @@ export const createEventSchema = z
         return true; // For free tickets, auto passed checking
     })
     .refine((data) => {
-        if (typeof data.capacity === "number" && Array.isArray(data.tickets)) {
+        if (data.capacity > 0 && Array.isArray(data.tickets)) {
             return (
                 data.capacity > data.maxTicketsPerUser &&
                 data.tickets?.reduce(
@@ -97,7 +97,7 @@ export const createEventSchema = z
                 ) <= data.capacity
             );
         }
-        if (typeof data.capacity === "number") {
+        if (data.capacity > 0) {
             return data.capacity > data.maxTicketsPerUser;
         }
         return true;

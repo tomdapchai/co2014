@@ -70,7 +70,7 @@ const Page = () => {
             description: "",
             location: "",
             guideline: "",
-            capacity: "unlimited",
+            capacity: 0,
             ticketType: "free",
             tickets: [],
             maxTicketsPerUser: 1,
@@ -92,7 +92,7 @@ const Page = () => {
         setIsCreate(true);
         try {
             if (!isLimited) {
-                data.capacity = "unlimited";
+                data.capacity = 0;
             }
             if (!isPaid) {
                 data.tickets = [];
@@ -106,16 +106,18 @@ const Page = () => {
             }
             // make async call to create event, contain all form data
             // navigate to event page
-
-            /* await createEvent(data).then((res) => {
-                if (res) {
+            console.log("test");
+            await createEvent(data)
+                .then((res) => {
+                    console.log(res);
                     if (res.success) {
+                        console.log("Event created");
                         router.push(`/event/${res.eventId}`);
                     }
-                } else {
-                    //throw new Error("Failed to create event");
-                }
-            }); */
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
 
             console.log(data);
         } catch (error) {
@@ -293,14 +295,15 @@ const Page = () => {
                                                         variant="ghost"
                                                         className="p-0 rounded-full"
                                                         size="icon"
-                                                        onClick={() => {
+                                                        onClick={(event) => {
+                                                            event.preventDefault();
                                                             const e =
                                                                 !isLimited;
                                                             setIsLimited(e);
                                                             if (!e) {
                                                                 form.setValue(
                                                                     "capacity",
-                                                                    "unlimited"
+                                                                    0
                                                                 );
                                                             } else {
                                                                 form.setValue(
@@ -372,7 +375,8 @@ const Page = () => {
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        onClick={() => {
+                                                        onClick={(event) => {
+                                                            event.preventDefault();
                                                             const e = !isPaid;
                                                             setIsPaid(e);
                                                             if (!e) {
@@ -558,11 +562,14 @@ const Page = () => {
                                                                     type="button"
                                                                     variant="ghost"
                                                                     size="icon"
-                                                                    onClick={() =>
+                                                                    onClick={(
+                                                                        e
+                                                                    ) => {
+                                                                        e.preventDefault();
                                                                         setEditingTicketIndex(
                                                                             -1
-                                                                        )
-                                                                    }
+                                                                        );
+                                                                    }}
                                                                     className="rounded-full">
                                                                     <Image
                                                                         src="/assets/checkIcon.svg"
@@ -580,11 +587,14 @@ const Page = () => {
                                                                     type="button"
                                                                     variant="ghost"
                                                                     size="icon"
-                                                                    onClick={() =>
+                                                                    onClick={(
+                                                                        e
+                                                                    ) => {
+                                                                        e.preventDefault();
                                                                         remove(
                                                                             index
-                                                                        )
-                                                                    }
+                                                                        );
+                                                                    }}
                                                                     className="rounded-full">
                                                                     <Image
                                                                         src="/assets/removeIcon.svg"
@@ -620,11 +630,14 @@ const Page = () => {
                                                                 <Button
                                                                     type="button"
                                                                     variant="ghost"
-                                                                    onClick={() =>
+                                                                    onClick={(
+                                                                        e
+                                                                    ) => {
+                                                                        e.preventDefault();
                                                                         setEditingTicketIndex(
                                                                             index
-                                                                        )
-                                                                    }
+                                                                        );
+                                                                    }}
                                                                     size="icon"
                                                                     className="rounded-full">
                                                                     <Image
@@ -642,11 +655,14 @@ const Page = () => {
                                                                 <Button
                                                                     type="button"
                                                                     variant="ghost"
-                                                                    onClick={() =>
+                                                                    onClick={(
+                                                                        e
+                                                                    ) => {
+                                                                        e.preventDefault();
                                                                         remove(
                                                                             index
-                                                                        )
-                                                                    }
+                                                                        );
+                                                                    }}
                                                                     size="icon"
                                                                     className="rounded-full">
                                                                     <Image
@@ -668,14 +684,15 @@ const Page = () => {
                                             ))}
                                             <Button
                                                 type="button"
-                                                onClick={() =>
+                                                onClick={(e) => {
+                                                    e.preventDefault();
                                                     append({
                                                         ticketName: "",
                                                         ticketPrice: 1,
                                                         ticketDescription: "",
                                                         ticketQuantity: 1,
-                                                    })
-                                                }>
+                                                    });
+                                                }}>
                                                 Add Ticket
                                             </Button>
                                         </FormItem>

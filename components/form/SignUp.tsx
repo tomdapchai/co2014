@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useRef } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import React, { useState, useEffect } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
     Card,
     CardContent,
@@ -25,15 +25,26 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import Link from "next/link";
 import { registerUser } from "@/lib/actions/auth.action";
+import { useAuth } from "@/context/AuthContext";
 
 const SignUp = () => {
+    const { isLoggedIn, register } = useAuth();
     const router = useRouter();
-    const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+
+    useEffect(() => {
+        if (isLoggedIn) {
+            const callbackUrl = searchParams.get("callbackUrl");
+            router.replace(callbackUrl || "/dashboard");
+        }
+    }, [isLoggedIn, router, searchParams]);
 
     const form = useForm<z.infer<typeof SignUpSchema>>({
         resolver: zodResolver(SignUpSchema),
         defaultValues: {
-            email: "",
+            username: "",
             password: "",
             confirmPassword: "",
         },
@@ -42,8 +53,17 @@ const SignUp = () => {
     async function onSubmit(values: z.infer<typeof SignUpSchema>) {
         // push to DB the credentials
         try {
-            await registerUser(values.email, values.password).then(() => {});
-        } catch (error) {}
+            await register(values.username, values.password)
+                .then((res) => {
+                    console.log(res);
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        } catch (error) {
+            console.error(error);
+            // suppose to display error message here
+        }
     }
 
     return (
@@ -61,7 +81,7 @@ const SignUp = () => {
                         className="flex w-full flex-col gap-5">
                         <FormField
                             control={form.control}
-                            name="email"
+                            name="username"
                             render={({ field }) => (
                                 <FormItem className="flex w-full flex-col">
                                     <FormLabel className="paragraph-semibold">
@@ -70,7 +90,7 @@ const SignUp = () => {
                                     <FormControl className="mt-1">
                                         <Input
                                             className="no-focus border"
-                                            placeholder="Enter your email here"
+                                            placeholder="Enter your username here"
                                             {...field}
                                         />
                                     </FormControl>

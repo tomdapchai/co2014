@@ -36,12 +36,13 @@ export interface EventData {
     description?: string;
     location: string;
     guideline?: string;
-    capacity: string | number;
+    capacity: number;
     ticketType: "free" | "paid";
     tickets?: TicketDetail[];
     maxTicketsPerUser: number;
-    registrations: Registration[]; // for storing registrations
+    registrations?: Registration[]; // for storing registrations
     byUser: string;
+    adId?: string;
 }
 
 export interface Registration {
@@ -81,3 +82,14 @@ export interface TransactionData {
 // transaction logic: user pay, click proceed, transaction status still pending. Host check if the user already sent => go to management to approve the payment.
 // After 24hrs, the transaction will be automatically approved.
 // If user decide to cancel the payment, status would remain "canceled" 4ever.
+
+export interface UserData {
+    id: string;
+    username: string;
+    email: string;
+    name: string;
+    avatar: string;
+    phone: string;
+    address: string;
+    dob: string;
+}

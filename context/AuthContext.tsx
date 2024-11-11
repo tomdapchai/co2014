@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useContext, createContext, useEffect } from "react";
+import Cookies from "js-cookie";
 import {
     loginUser,
     registerUser,
@@ -10,9 +11,9 @@ interface AuthContextProps {
     isLoggedIn: boolean;
     userId: string;
     error: string | null;
-    login: (email: string, password: string) => Promise<void>;
+    login: (username: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
-    register: (email: string, password: string) => Promise<void>;
+    register: (username: string, password: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -29,23 +30,46 @@ interface AuthProviderProps {
     children: React.ReactNode;
 }
 
+const COOKIE_NAME = "auth_user_id";
+const COOKIE_OPTIONS = {
+    expires: 1,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict" as const,
+    path: "/",
+};
+
 const AuthProvider = ({ children }: AuthProviderProps) => {
     const [userId, setUserId] = useState<string>("");
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const [isInitialized, setIsInitialized] = useState(false);
 
-    //mock data
+    // Load the authentication state from cookies when the component mounts
     useEffect(() => {
-        setUserId("1234");
+        const storedUserId = Cookies.get(COOKIE_NAME);
+        if (storedUserId) {
+            setUserId(storedUserId);
+            setIsLoggedIn(true);
+        }
+        setIsInitialized(true);
     }, []);
 
-    const login = async (email: string, password: string) => {
-        try {
-            const response = await loginUser(email, password);
+    // Update cookie whenever the authentication state changes
+    const updateAuthState = (newUserId: string, isLoggedIn: boolean) => {
+        if (isLoggedIn) {
+            Cookies.set(COOKIE_NAME, newUserId, COOKIE_OPTIONS);
+        } else {
+            Cookies.remove(COOKIE_NAME, { path: "/" });
+        }
+        setUserId(newUserId);
+        setIsLoggedIn(isLoggedIn);
+    };
 
+    const login = async (username: string, password: string) => {
+        try {
+            const response = await loginUser(username, password);
             if (response.success && response.userId) {
-                setUserId(response.userId);
-                setIsLoggedIn(true);
+                updateAuthState(response.userId, true);
                 setError(null);
             } else {
                 setError(response.message);
@@ -59,13 +83,11 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
         }
     };
 
-    const register = async (email: string, password: string) => {
+    const register = async (username: string, password: string) => {
         try {
-            const response = await registerUser(email, password);
-
+            const response = await registerUser(username, password);
             if (response.success && response.userId) {
-                setUserId(response.userId);
-                setIsLoggedIn(true);
+                updateAuthState(response.userId, true);
                 setError(null);
             } else {
                 setError(response.message);
@@ -80,10 +102,14 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     };
 
     const logout = async () => {
-        setUserId("");
-        setIsLoggedIn(false);
+        updateAuthState("", false);
         setError(null);
     };
+
+    // Don't render children until we've checked cookies
+    if (!isInitialized) {
+        return null; // Or a loading spinner
+    }
 
     return (
         <AuthContext.Provider

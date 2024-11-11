@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useRef } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import React, { useState, useEffect } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
     Card,
     CardContent,
@@ -28,15 +28,23 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
 const SignIn = () => {
-    const { login } = useAuth();
+    const { isLoggedIn, login } = useAuth();
     const router = useRouter();
-    const pathname = usePathname();
-    const [isLoggedInSuccess, setIsLoggedInSuccess] = useState(true);
+    const searchParams = useSearchParams();
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+
+    useEffect(() => {
+        if (isLoggedIn) {
+            const callbackUrl = searchParams.get("callbackUrl");
+            router.replace(callbackUrl || "/dashboard");
+        }
+    }, [isLoggedIn, router, searchParams]);
 
     const form = useForm<z.infer<typeof SignInSchema>>({
         resolver: zodResolver(SignInSchema),
         defaultValues: {
-            email: "",
+            username: "",
             password: "",
         },
     });
@@ -45,19 +53,25 @@ const SignIn = () => {
         // do validation here
         try {
             // encrypt password before sending
-            /* await login(values.email, values.password).then((res) => {
+            /* await login(values.username, values.password).then((res) => {
                 if (res.status === 'success') {
                     setIsLoggedInSuccess(true);
                 } else {
                     setIsLoggedInSuccess(false);
                 }
             }); */
+            await login(values.username, values.password)
+                .then((res) => {
+                    console.log(res);
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+            // router.push("/dashboard");
         } catch (error) {
             console.error(error);
-            setIsLoggedInSuccess(false);
             // suppose to display error message here (use toast)
         }
-        router.push("/dashboard");
     }
 
     return (
@@ -75,7 +89,7 @@ const SignIn = () => {
                         className="flex w-full flex-col gap-5">
                         <FormField
                             control={form.control}
-                            name="email"
+                            name="username"
                             render={({ field }) => (
                                 <FormItem className="flex w-full flex-col">
                                     <FormLabel className="paragraph-semibold">
@@ -84,7 +98,7 @@ const SignIn = () => {
                                     <FormControl className="mt-1">
                                         <Input
                                             className="no-focus border"
-                                            placeholder="Enter your email here"
+                                            placeholder="Enter your username here"
                                             {...field}
                                         />
                                     </FormControl>
