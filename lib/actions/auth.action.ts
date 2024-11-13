@@ -75,10 +75,14 @@ export async function registerUser(
 
         const hashPassword = bcrypt.hashSync(password, salt);
 
+        const avatar = "/assets/avatar.png";
+
+        const dob = new Date().toISOString().slice(0, 10);
+
         // Insert new user
         const [result] = await pool.execute<ResultSetHeader>(
-            "INSERT INTO user (username, password) VALUES (?, ?)",
-            [username, hashPassword] // TODO: Hash password before storing
+            "INSERT INTO user (username, password, avatar, date_of_birth) VALUES (?, ?)",
+            [username, hashPassword, avatar, dob] // TODO: Hash password before storing
         );
 
         console.log("Registration result:", result);

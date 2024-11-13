@@ -8,7 +8,7 @@ import {
     getUserData,
 } from "@/lib/actions/user.action";
 import { getEventData } from "@/lib/actions/event.action";
-import { EventData } from "@/types";
+import { EventData, UserData } from "@/types";
 import { set } from "date-fns";
 import Image from "next/image";
 import Link from "next/link";
@@ -34,10 +34,28 @@ import { get } from "http";
 import { Card, CardContent, CardDescription } from "@/components/ui/card";
 // There will be following actions from user: registerEvent, cancelRegistration used here
 
+const getUser = async (
+    userId: string
+): Promise<UserData | { error: string }> => {
+    try {
+        const data = await getUserData(userId);
+        if ("error" in data) {
+            return data;
+        } else {
+            return data;
+        }
+    } catch (err) {
+        console.log(userId, err);
+        return { error: "Error getting user data" };
+    }
+};
+
 const page = ({ params }: { params: { eventId: string } }) => {
     const eventId = params.eventId;
     const { userId } = useAuth();
     const [eventData, setEventData] = useState<EventData>();
+    const [userData, setUserData] = useState<UserData>();
+    const [hostData, setHostData] = useState<UserData>();
     const [isRegistering, setIsRegistering] = useState(false);
     const [isPaidEvent, setIsPaidEvent] = useState(false);
     const [isAvailable, setIsAvailable] = useState(false);
@@ -57,7 +75,7 @@ const page = ({ params }: { params: { eventId: string } }) => {
     // would contains all user info, would define interface later
 
     useEffect(() => {
-        const getData = async () => {
+        const getEvent = async () => {
             try {
                 const data = await getEventData(eventId);
                 if ("error" in data) {
@@ -72,37 +90,20 @@ const page = ({ params }: { params: { eventId: string } }) => {
             }
         };
 
-        getData();
+        getEvent();
 
-        /* setEventData({
-            name: "test",
-            logo: "/assets/eventLogo.png",
-            type: "public",
-            start: "2025-10-31T17:25",
-            end: "2025-10-31T17:55",
-            description: "description",
-            location: "location",
-            guideline: "guideline",
-            capacity: 20,
-            ticketType: "paid",
-            tickets: [
-                {
-                    ticketName: "Free",
-                    ticketPrice: 0,
-                    ticketDescription: "Free tickets for everyone",
-                    ticketQuantity: 10,
-                },
-                {
-                    ticketName: "VIP",
-                    ticketPrice: 10000000,
-                    ticketDescription: "Vip ticket for riches",
-                    ticketQuantity: 9,
-                },
-            ],
-            maxTicketsPerUser: 10,
-            registrations: [],
-            byUser: "1234",
-        }); */
+        getUser(userId)
+            .then((data) => {
+                if ("error" in data) {
+                    console.error(data.error);
+                } else {
+                    console.log(data);
+                    setUserData(data);
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            });
     }, []);
 
     useEffect(() => {
@@ -161,6 +162,21 @@ const page = ({ params }: { params: { eventId: string } }) => {
                 })),
             });
         }
+
+        if (eventData?.byUser && eventData.byUser !== userId) {
+            getUser(eventData.byUser as string).then((data) => {
+                if ("error" in data) {
+                    console.error(data.error);
+                } else {
+                    console.log(data);
+                    setHostData(data);
+                }
+            });
+        }
+
+        if (eventData?.byUser === userId) {
+            setHostData(userData);
+        }
     }, [eventData]);
 
     // just for testing
@@ -199,8 +215,9 @@ const page = ({ params }: { params: { eventId: string } }) => {
         setIsRegistering(true);
 
         try {
-            console.log(data);
-            await getData();
+            const registerData = { userId, ...data };
+            console.log(registerData);
+            /* await getData(); */
             /* if (!isPaidEvent) {
                 if (data.defaultQuantity > 0) {
                     await registerEvent(data, userId);
@@ -285,10 +302,19 @@ const page = ({ params }: { params: { eventId: string } }) => {
                     </div>
                 ) : (
                     // userId will be replaced by user name
-                    <div>
-                        Host by{" "}
-                        <Link href={`/user/${eventData?.byUser}`}>
-                            {/* getUserData(eventData?.byUser) */}
+                    <div className="whitespace-nowrap flex space-x-2">
+                        <p>Host by</p>
+                        <Link
+                            href={`/user/${eventData?.byUser}`}
+                            className="flex space-x-2">
+                            <Image
+                                src={hostData?.avatar || "/assets/avatar.png"}
+                                alt="host avatar"
+                                width={20}
+                                height={20}
+                                className="rounded-full"
+                            />
+                            <p className="font-bold">{hostData?.username}</p>
                         </Link>
                     </div>
                 )}
@@ -342,7 +368,7 @@ const page = ({ params }: { params: { eventId: string } }) => {
                                                             control={
                                                                 form.control
                                                             }
-                                                            name="quantity"
+                                                            name="defaultQuantity"
                                                             defaultValue={0}
                                                             min={0}
                                                             max={Math.min(

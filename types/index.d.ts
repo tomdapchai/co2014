@@ -84,12 +84,15 @@ export interface TransactionData {
 // If user decide to cancel the payment, status would remain "canceled" 4ever.
 
 export interface UserData {
-    id: string;
     username: string;
-    email: string;
-    name: string;
+    email?: string;
+    name?: string;
     avatar: string;
-    phone: string;
-    address: string;
-    dob: string;
+    sex: "male" | "female";
+    address?: {
+        city?: string;
+        province?: string;
+        country?: string;
+    };
+    dob?: string;
 }

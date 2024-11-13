@@ -136,7 +136,7 @@ const Page = () => {
     }, [eventView, events]);
 
     return (
-        <div className="w-[900px] flex flex-col justify-start items-center gap-10">
+        <div className="w-[900px] flex flex-col justify-start items-center gap-10 pb-6">
             <div className="flex justify-between items-center w-full border-b-[1px] border-b-slate-900 py-6">
                 <h1 className="text-2xl font-bold">Events</h1>
                 <div className="flex w-fit bg-slate-900 bg-opacity-20 rounded-md">
