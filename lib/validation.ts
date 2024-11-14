@@ -57,7 +57,7 @@ export const createEventSchema = z
         guideline: z.optional(z.string().max(200)),
         capacity: z.number().int().nonnegative(),
         ticketType: z.enum(["free", "paid"]),
-        tickets: z.optional(z.array(ticketDetailSchema)),
+        tickets: z.array(ticketDetailSchema),
         maxTicketsPerUser: z.number().int().positive(),
         byUser: z.string(),
     })

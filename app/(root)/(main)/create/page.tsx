@@ -95,7 +95,14 @@ const Page = () => {
                 data.capacity = 0;
             }
             if (!isPaid) {
-                data.tickets = [];
+                data.tickets = [
+                    {
+                        ticketName: "Free",
+                        ticketPrice: 0,
+                        ticketDescription: "Free ticket",
+                        ticketQuantity: data.maxTicketsPerUser,
+                    }
+                ];
             }
             if (
                 isPaid &&
@@ -103,6 +110,14 @@ const Page = () => {
                     data.tickets.length === 0)
             ) {
                 data.ticketType = "free";
+                data.tickets = [
+                    {
+                        ticketName: "Free",
+                        ticketPrice: 0,
+                        ticketDescription: "Free ticket",
+                        ticketQuantity: data.maxTicketsPerUser,
+                    }
+                ];
             }
             // make async call to create event, contain all form data
             // navigate to event page

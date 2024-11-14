@@ -144,9 +144,7 @@ const page = ({ params }: { params: { eventId: string } }) => {
             // reduce ticket quantity by registered tickets with type "paid", comparing ticketName
             if (eventData.registrations)
                 eventData.registrations.forEach((registration) => {
-                    if (registration.type === "paid") {
-                        ticketLeft[registration.ticketName as string]--;
-                    }
+                    ticketLeft[registration.ticketName as string]--;
                 });
             setTicketLeft(ticketLeft);
         }
@@ -215,11 +213,24 @@ const page = ({ params }: { params: { eventId: string } }) => {
         setIsRegistering(true);
 
         try {
-            const registerData = { userId, ...data };
+            data.multiType[0] = {
+                name: data.multiType[0].name,
+                price: 0,
+                quantity: data.defaultQuantity,
+            };
+
+            const registerData = {
+                userId,
+                ticketType: eventData?.ticketType,
+                tickets: eventData?.tickets,
+                maxTickerPerUser: eventData?.maxTicketsPerUser,
+                ...data,
+            };
             console.log(registerData);
             /* await getData(); */
             /* if (!isPaidEvent) {
                 if (data.defaultQuantity > 0) {
+                    add multiType with free ticket {free, 0, "", quantity}
                     await registerEvent(data, userId);
                 }
             } */
@@ -372,8 +383,16 @@ const page = ({ params }: { params: { eventId: string } }) => {
                                                             defaultValue={0}
                                                             min={0}
                                                             max={Math.min(
-                                                                capacityLeft
-                                                                    ? capacityLeft
+                                                                ticketLeft[
+                                                                    eventData
+                                                                        .tickets[0]
+                                                                        .ticketName
+                                                                ]
+                                                                    ? ticketLeft[
+                                                                          eventData
+                                                                              .tickets[0]
+                                                                              .ticketName
+                                                                      ]
                                                                     : 0,
                                                                 eventData.maxTicketsPerUser
                                                             )}

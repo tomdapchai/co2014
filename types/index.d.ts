@@ -38,7 +38,7 @@ export interface EventData {
     guideline?: string;
     capacity: number;
     ticketType: "free" | "paid";
-    tickets?: TicketDetail[];
+    tickets: TicketDetail[];
     maxTicketsPerUser: number;
     registrations?: Registration[]; // for storing registrations
     byUser: string;
@@ -60,9 +60,13 @@ interface multiType {
     quantity: number;
 }
 export interface RegistrationData {
+    userId: string;
     eventId: string;
+    maxTicketPerUser: number;
     defaultQuantity: number;
+    ticketType: "free" | "paid";
     multiType: multiType[];
+    eventTickets: TicketDetail[];
 }
 
 export type Product = {

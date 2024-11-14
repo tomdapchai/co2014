@@ -103,16 +103,6 @@ export async function getEventData(
         return { error: "Event not found" };
     }
 
-    const [eventTicket] = await pool.execute(
-        "SELECT * FROM ticket_type WHERE ID_event = ?",
-        [eventId]
-    );
-
-    const [eventRegistration] = await pool.execute(
-        "SELECT * FROM ticket_registered WHERE ID_event = ?",
-        [eventId]
-    );
-
     const {
         start_date_time,
         end_date_time,
@@ -123,13 +113,29 @@ export async function getEventData(
         description,
         guideline,
         ID_ad,
+        type,
         ...restEvent
     } = (event as RowDataPacket)[0];
+
+    /* if (type === "private") {
+        return { error: "Event is privated" };
+    } */
+
+    const [eventTicket] = await pool.execute(
+        "SELECT * FROM ticket_type WHERE ID_event = ?",
+        [eventId]
+    );
+
+    const [eventRegistration] = await pool.execute(
+        "SELECT * FROM ticket_registered WHERE ID_event = ?",
+        [eventId]
+    );
 
     var tzoffset = new Date().getTimezoneOffset() * 60000; // timezone offset in milliseconds
 
     const eventData = {
         ...restEvent,
+        type: type,
         logo: event_logo,
         start: new Date(start_date_time - tzoffset).toISOString().slice(0, 16),
         end: new Date(end_date_time - tzoffset).toISOString().slice(0, 16),
