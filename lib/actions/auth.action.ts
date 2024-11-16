@@ -81,7 +81,7 @@ export async function registerUser(
 
         // Insert new user
         const [result] = await pool.execute<ResultSetHeader>(
-            "INSERT INTO user (username, password, avatar, date_of_birth) VALUES (?, ?)",
+            "INSERT INTO user (username, password, avatar, date_of_birth) VALUES (?, ?, ?, ?)",
             [username, hashPassword, avatar, dob] // TODO: Hash password before storing
         );
 

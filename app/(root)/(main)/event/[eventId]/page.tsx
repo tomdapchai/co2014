@@ -1,14 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
-import {
-    registerEvent,
-    cancelRegistration,
-    getUserData,
-} from "@/lib/actions/user.action";
+import { useRouter, usePathname } from "next/navigation";
+import { getUserData } from "@/lib/actions/user.action";
+import { registerEvent } from "@/lib/actions/register.action";
 import { getEventData } from "@/lib/actions/event.action";
-import { EventData, UserData } from "@/types";
+import { EventData, Registration, UserData } from "@/types";
 import { set } from "date-fns";
 import Image from "next/image";
 import Link from "next/link";
@@ -29,9 +26,12 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { registerEventSchema } from "@/lib/validation";
 import InputNumber from "@/components/input/InputNumber";
 import TicketCard from "@/components/card/TicketCard";
-import { getData } from "@/lib/actions/test.action";
-import { get } from "http";
 import { Card, CardContent, CardDescription } from "@/components/ui/card";
+import RegisteredCard from "@/components/card/RegisteredCard";
+import { Toast, ToastAction } from "@/components/ui/toast";
+import { useToast } from "@/hooks/use-toast";
+import { cancelRegistration } from "@/lib/actions/register.action";
+import { get } from "http";
 // There will be following actions from user: registerEvent, cancelRegistration used here
 
 const getUser = async (
@@ -56,6 +56,7 @@ const page = ({ params }: { params: { eventId: string } }) => {
     const [eventData, setEventData] = useState<EventData>();
     const [userData, setUserData] = useState<UserData>();
     const [hostData, setHostData] = useState<UserData>();
+    const [userRegistered, setUserRegistered] = useState<Registration[]>([]);
     const [isRegistering, setIsRegistering] = useState(false);
     const [isPaidEvent, setIsPaidEvent] = useState(false);
     const [isAvailable, setIsAvailable] = useState(false);
@@ -64,6 +65,9 @@ const page = ({ params }: { params: { eventId: string } }) => {
     // for caculating how many tickets each type left if there are multiple ticket types
     const [ticketLeft, setTicketLeft] = useState<Record<string, number>>({});
     const router = useRouter();
+    const { toast } = useToast();
+    const path = usePathname();
+    console.log(userId);
     // Example Usage:
     /* setTicketLeft((prev) => ({ ...prev, vip1: 3 }));
 
@@ -72,38 +76,38 @@ const page = ({ params }: { params: { eventId: string } }) => {
         vip2: 5,
     }); */
 
-    // would contains all user info, would define interface later
+    const getEvent = async () => {
+        try {
+            const data = await getEventData(eventId);
+            if ("error" in data) {
+                console.error(data.error);
+                // Route to the not-found page
+                router.push("/not-found");
+            } else {
+                setEventData(data);
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    };
 
     useEffect(() => {
-        const getEvent = async () => {
-            try {
-                const data = await getEventData(eventId);
-                if ("error" in data) {
-                    console.error(data.error);
-                    // Route to the not-found page
-                    router.push("/not-found");
-                } else {
-                    setEventData(data);
-                }
-            } catch (err) {
-                console.log(err);
-            }
-        };
+        if (!eventData) getEvent();
 
-        getEvent();
-
-        getUser(userId)
-            .then((data) => {
-                if ("error" in data) {
-                    console.error(data.error);
-                } else {
-                    console.log(data);
-                    setUserData(data);
-                }
-            })
-            .catch((err) => {
-                console.log(err);
-            });
+        if (!userData) {
+            getUser(userId)
+                .then((data) => {
+                    if ("error" in data) {
+                        console.error(data.error);
+                    } else {
+                        console.log(data);
+                        setUserData(data);
+                    }
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        }
     }, []);
 
     useEffect(() => {
@@ -138,14 +142,18 @@ const page = ({ params }: { params: { eventId: string } }) => {
 
             // set initial ticket quantity if there are multiple ticket types
             eventData?.tickets?.forEach((ticket) => {
+                console.log("check");
                 ticketLeft[ticket.ticketName] = ticket.ticketQuantity;
             });
 
-            // reduce ticket quantity by registered tickets with type "paid", comparing ticketName
+            console.log("test ticketLeft1", ticketLeft);
+
             if (eventData.registrations)
                 eventData.registrations.forEach((registration) => {
-                    ticketLeft[registration.ticketName as string]--;
+                    ticketLeft[registration.type as string]--;
                 });
+
+            console.log("test ticketLeft2", ticketLeft);
             setTicketLeft(ticketLeft);
         }
 
@@ -175,12 +183,20 @@ const page = ({ params }: { params: { eventId: string } }) => {
         if (eventData?.byUser === userId) {
             setHostData(userData);
         }
+
+        if (eventData?.registrations) {
+            const registration = eventData.registrations.filter(
+                (data) => data.userId == userId
+            );
+            setUserRegistered(registration);
+        }
     }, [eventData]);
 
     // just for testing
     useEffect(() => {
         console.log("ticket left", ticketLeft);
         console.log("capacity left", capacityLeft);
+        console.log("user registered", userRegistered);
     }, [ticketLeft, capacityLeft]);
 
     // the error is because form hasnt received eventData yet (at first render)
@@ -205,6 +221,29 @@ const page = ({ params }: { params: { eventId: string } }) => {
     // still allow user to register if they have registered before, but not exceed maxTicketsPerUser. if exceed, doesnt show tickets or any register field.
     // each ticket registered would count as an registration
 
+    const handleOnCancel = async (ticketId: string, cost: number) => {
+        try {
+            await cancelRegistration(ticketId, cost, path).then((res) => {
+                if ("error" in res) {
+                    toast({
+                        title: "Error",
+                        description: res.error,
+                        variant: "destructive",
+                    });
+                } else {
+                    toast({
+                        title: "Registration Cancelled",
+                        description: res.message,
+                        variant: "default",
+                    });
+                    getEvent();
+                }
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     async function onSubmit(data: z.infer<typeof registerEventSchema>) {
         // send registered tickets to event
         // this is complicated, as paid tickets need to be paid first, by transaction system (i have no idea)
@@ -212,21 +251,43 @@ const page = ({ params }: { params: { eventId: string } }) => {
         // handle logic
         setIsRegistering(true);
 
+        // test for free ticket, will adjust later for paid too
         try {
-            data.multiType[0] = {
+            /* data.multiType[0] = {
                 name: data.multiType[0].name,
                 price: 0,
                 quantity: data.defaultQuantity,
-            };
+            }; */
 
-            const registerData = {
-                userId,
-                ticketType: eventData?.ticketType,
-                tickets: eventData?.tickets,
-                maxTickerPerUser: eventData?.maxTicketsPerUser,
-                ...data,
-            };
-            console.log(registerData);
+            if (eventData) {
+                const registerData = {
+                    userId: userId,
+                    ticketType: eventData.ticketType,
+                    eventTickets: eventData.tickets,
+                    maxTicketPerUser: eventData.maxTicketsPerUser,
+                    ...data,
+                };
+                console.log(registerData);
+                if (!isPaidEvent) {
+                    await registerEvent(registerData, path).then((res) => {
+                        if ("error" in res) {
+                            toast({
+                                title: "Error",
+                                description: res.error,
+                                variant: "destructive",
+                            });
+                        } else {
+                            toast({
+                                title: "Success",
+                                description: res.message,
+                                variant: "default",
+                            });
+                            getEvent();
+                        }
+                    });
+                }
+            }
+
             /* await getData(); */
             /* if (!isPaidEvent) {
                 if (data.defaultQuantity > 0) {
@@ -356,6 +417,33 @@ const page = ({ params }: { params: { eventId: string } }) => {
                         </p>
                         <p>{eventData.guideline}</p>
                     </div>
+                )}
+                {userRegistered.length > 0 ? (
+                    <div className="flex flex-col space-y-2">
+                        <p className="font-bold text-2xl">
+                            You have registered
+                        </p>
+                        <div className="flex flex-col space-y-2 w-full">
+                            {userRegistered.map((data) => (
+                                <RegisteredCard
+                                    key={data.ticketId}
+                                    type={data.type}
+                                    status={data.status}
+                                    ticketId={data.ticketId}
+                                    cost={
+                                        eventData?.tickets.find(
+                                            (ticket) =>
+                                                ticket.ticketName.toUpperCase() ===
+                                                data.type?.toUpperCase()
+                                        )?.ticketPrice as number
+                                    }
+                                    onCancel={handleOnCancel}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                ) : (
+                    ""
                 )}
                 <div className="flex flex-col space-y-2">
                     {/* register form here, after registered quantity is lowered */}

@@ -35,6 +35,7 @@ import LogoUpload from "@/components/input/LogoUpload";
 import SelectForm from "@/components/input/SelectForm";
 import InputDateTime from "@/components/input/InputDateTime";
 import { createEvent } from "@/lib/actions/event.action";
+import { MAX } from "uuid";
 
 const Page = () => {
     // mock eventId
@@ -100,8 +101,10 @@ const Page = () => {
                         ticketName: "Free",
                         ticketPrice: 0,
                         ticketDescription: "Free ticket",
-                        ticketQuantity: data.maxTicketsPerUser,
-                    }
+                        ticketQuantity: isLimited
+                            ? data.capacity
+                            : Number.MAX_SAFE_INTEGER,
+                    },
                 ];
             }
             if (
@@ -115,13 +118,14 @@ const Page = () => {
                         ticketName: "Free",
                         ticketPrice: 0,
                         ticketDescription: "Free ticket",
-                        ticketQuantity: data.maxTicketsPerUser,
-                    }
+                        ticketQuantity: isLimited
+                            ? data.capacity
+                            : Number.MAX_SAFE_INTEGER,
+                    },
                 ];
             }
             // make async call to create event, contain all form data
             // navigate to event page
-            console.log("test");
             await createEvent(data)
                 .then((res) => {
                     console.log(res);

@@ -20,7 +20,7 @@ const Header = () => {
     const [notifications, setNotifications] = useState<notificationProps[]>([]);
     const [currentTime, setCurrentTime] = useState("");
     const router = useRouter();
-    const { userId, logout } = useAuth();
+    const { isLoggedIn, userId, logout } = useAuth();
 
     useEffect(() => {
         // fetch notifications from the server
@@ -74,7 +74,7 @@ const Header = () => {
 
     return (
         <header className="flex justify-between items-center py-5 px-5 w-full sticky top-0 left-0 z-50 backdrop-blur-md">
-            <Link href="/">
+            <Link href={`${isLoggedIn ? "/dashboard" : "/"} `}>
                 <h1 className="text-3xl font-bold">LAMBO</h1>
             </Link>
             <div className="flex justify-between items-center w-1/2">
@@ -160,12 +160,12 @@ const Header = () => {
                         <DropdownMenuLabel>My Account</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
-                            <DropdownMenuItem>
-                                <Link href={`user/${userId}`}>Profile</Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                                <Link href={"/settings"}>Settings</Link>
-                            </DropdownMenuItem>
+                            <Link href={`user/${userId}`}>
+                                <DropdownMenuItem>Profile</DropdownMenuItem>
+                            </Link>
+                            <Link href={"/settings"}>
+                                <DropdownMenuItem>Settings</DropdownMenuItem>
+                            </Link>
                             <DropdownMenuItem onClick={() => handleLogout()}>
                                 Log out
                             </DropdownMenuItem>

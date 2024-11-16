@@ -1,7 +1,8 @@
 "use server";
 import pool from "../mysql";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
-import { EventData } from "@/types";
+import { EventData, Registration } from "@/types";
+import { getRegistrationData } from "./register.action";
 
 type createEventMessage = {
     success: boolean;
@@ -28,7 +29,7 @@ export async function createEvent(
     } = data;
 
     const queryEvent =
-        "INSERT INTO event (name, type, event_logo, start_date_time, end_date_time, location, guideline, description, capacity, ticketType, max_ticket_per_register) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        "INSERT INTO event (name, type, event_logo, start_date_time, end_date_time, location, guideline, description, capacity, isPaid, max_ticket_per_register) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     const queryTicket = `INSERT INTO ticket_type (ID_event,type,cost,quantity,description) VALUES (?, ?, ?, ?, ?)`;
 
@@ -103,24 +104,6 @@ export async function getEventData(
         return { error: "Event not found" };
     }
 
-    const {
-        start_date_time,
-        end_date_time,
-        ID_organizer,
-        event_logo,
-        max_ticket_per_register,
-        ID_event,
-        description,
-        guideline,
-        ID_ad,
-        type,
-        ...restEvent
-    } = (event as RowDataPacket)[0];
-
-    /* if (type === "private") {
-        return { error: "Event is privated" };
-    } */
-
     const [eventTicket] = await pool.execute(
         "SELECT * FROM ticket_type WHERE ID_event = ?",
         [eventId]
@@ -131,11 +114,50 @@ export async function getEventData(
         [eventId]
     );
 
+    const registrationPromises = (eventRegistration as RowDataPacket).map(
+        async ({ ID_ticket, type }: any) => {
+            const regType = type;
+            const cost = (eventTicket as RowDataPacket).find(
+                ({ type }: any) => type.toUpperCase() === regType.toUpperCase()
+            ).cost;
+
+            const res = await getRegistrationData(ID_ticket, cost);
+            const { ID_user, hasCheckedIn, approval_status } = (
+                res as RowDataPacket
+            )[0];
+
+            return {
+                ticketId: ID_ticket,
+                type: regType,
+                status: approval_status,
+                hasCheckedIn: hasCheckedIn,
+                eventId: eventId,
+                userId: ID_user,
+            };
+        }
+    );
+
+    // Wait for all registration data to be collected
+    const registrationData = await Promise.all(registrationPromises);
+
+    const {
+        start_date_time,
+        end_date_time,
+        ID_organizer,
+        event_logo,
+        max_ticket_per_register,
+        ID_event,
+        description,
+        guideline,
+        ID_ad,
+        isPaid,
+        ...restEvent
+    } = (event as RowDataPacket)[0];
+
     var tzoffset = new Date().getTimezoneOffset() * 60000; // timezone offset in milliseconds
 
     const eventData = {
         ...restEvent,
-        type: type,
         logo: event_logo,
         start: new Date(start_date_time - tzoffset).toISOString().slice(0, 16),
         end: new Date(end_date_time - tzoffset).toISOString().slice(0, 16),
@@ -148,14 +170,15 @@ export async function getEventData(
                 ticketDescription: description,
             })
         ),
-        registrations: eventRegistration,
+        registrations: registrationData,
         maxTicketsPerUser: max_ticket_per_register,
         description: description ? description : "",
         guideline: guideline ? guideline : "",
         adId: ID_ad ? ID_ad.toString() : "",
+        ticketType: isPaid == "paid" ? "paid" : "free",
     };
 
-    console.log(eventData);
+    //console.log(eventData);
     return eventData;
 }
 

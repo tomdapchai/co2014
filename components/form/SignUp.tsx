@@ -85,7 +85,7 @@ const SignUp = () => {
                             render={({ field }) => (
                                 <FormItem className="flex w-full flex-col">
                                     <FormLabel className="paragraph-semibold">
-                                        Email
+                                        Username
                                     </FormLabel>
                                     <FormControl className="mt-1">
                                         <Input

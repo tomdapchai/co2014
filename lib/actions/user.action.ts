@@ -1,63 +1,75 @@
 "use server";
-import { RegistrationData, UserData } from "@/types";
+import { EventData, RegistrationData, UserData } from "@/types";
 import pool from "../mysql";
 import { RowDataPacket } from "mysql2";
-import { v4 as uuidv4 } from "uuid";
-
+import { revalidatePath } from "next/cache";
+import { EventView } from "@/types";
+import { getEventData } from "./event.action";
 // do get/post request to get user data from DB here
 
 // With event
-interface RegistrationResponse {
-    ticketId?: string;
-    message: string;
-}
 
-export const registerEvent = async (
-    data: RegistrationData
-): Promise<RegistrationResponse> => {
-    const {
-        userId,
-        eventId,
-        defaultQuantity,
-        multiType,
-        ticketType,
-        eventTickets,
-        maxTicketPerUser,
-    } = data;
+export const getRegisteredEvents = async (
+    userId: string
+): Promise<EventView[] | { error: string }> => {
+    // For free tickets
+    const [freeRegistrations] = await pool.execute(
+        "SELECT * FROM free_ticket ft JOIN ticket_registered tr ON ft.ID_ticket = tr.ID_ticket WHERE ID_user = ?",
+        [userId]
+    );
 
-    if (ticketType === "free") {
-        const [freeRegistered] = await pool.execute(
-            "SELECT * FROM (((customer c JOIN free_ticket ft) ON c.ID_user = ft.ID_user) cft JOIN ticket_registered tr ON cft.ID_ticket = tr.ID_ticket) cfttr JOIN ticket_type tt ON cfttr.ID_event = tt.ID_event) t JOIN event e ON tt.ID_event = e.ID_event WHERE c.ID_user = ? AND e.ID_event = ?",
-            [userId, eventId]
-        );
+    const regEventIds: any[] = [];
+    (freeRegistrations as RowDataPacket[]).forEach((data) => {
+        const { ID_event } = data;
+        if (!regEventIds.includes(ID_event)) regEventIds.push(ID_event);
+    });
 
-        if ((freeRegistered as RowDataPacket).length >= maxTicketPerUser) {
-            return {
-                ticketId: undefined,
-                message: "User has reached maximum ticket registration",
-            };
-        }
+    console.log("regEventIds", regEventIds);
 
-        // perform register: insert into customer->free_ticket
-        await pool.execute("INSERT IGNORE INTO customer (ID_user) VALUE (?)", [
-            userId,
-        ]);
+    const mappedIds = regEventIds.map(async (eventId) => {
+        const res = await getEventData(eventId);
+        return res;
+    });
 
-        const ticketId = uuidv4();
+    const regEventData = await Promise.all(mappedIds);
 
-        await pool.execute(
-            "INSERT INTO free_ticket (ID_ticket, approval_status, ID_user) VALUE (?, ?, ?)",
-            [ticketId, "pending", userId]
-        );
-    }
+    const mappedEvents = regEventData.map(async (data, index) => {
+        const eventId = regEventIds[index];
+        /*  */
+        const { name, logo, start, end, location, registrations, byUser } =
+            data as EventData;
 
-    return { message: "wait for implement" };
-    // check if user already registered before & count how many registrations by user (to compare with maxTicketsPerUser)
+        const userData = await getUserData(byUser);
+
+        const {
+            username = "Unknown",
+            name: userName,
+            avatar = "",
+        } = "error" in userData ? {} : userData;
+
+        return {
+            id: eventId,
+            title: name,
+            logo: logo,
+            start: start,
+            end: end,
+            location: location,
+            attendees: registrations ? registrations.length : 0,
+            byUser: {
+                id: byUser,
+                name: userName || username,
+                avatar: avatar,
+            },
+        };
+    });
+
+    const regData = await Promise.all(mappedEvents);
+
+    console.log("regData", regData);
+
+    return regData;
+    return { error: "Not implemented" };
 };
-
-export const cancelRegistration = async (eventId: string, userId: string) => {};
-
-export const getRegisteredEvents = async (userId: string) => {};
 
 // with personal
 export const getUserData = async (

@@ -16,7 +16,18 @@ const Page = () => {
     // mock events data
     useEffect(() => {
         //await getRegisteredEvents(userId).then((data) => {setEvents(data);});
-        const mockEvents: EventView[] = [
+        const getEvent = async () => {
+            await getRegisteredEvents(userId).then((data) => {
+                if ("error" in data) {
+                    console.log(data.error);
+                } else {
+                    setEvents(data);
+                }
+            });
+        };
+
+        getEvent();
+        /* const mockEvents: EventView[] = [
             {
                 id: "1",
                 title: "Event 1",
@@ -115,8 +126,7 @@ const Page = () => {
                     avatar: "/assets/avatar.png",
                 },
             },
-        ];
-        setEvents(mockEvents);
+        ]; */
     }, []);
 
     useEffect(() => {

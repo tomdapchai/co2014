@@ -49,8 +49,8 @@ export interface Registration {
     userId: string;
     ticketId: string;
     type: "free" | "paid";
-    ticketName?: string; // for paid ticket
-    status?: "pending" | "approved" | "rejected";
+    ticketName?: string;
+    status: "pending" | "approved" | "rejected";
     hasChekedIn: boolean;
 }
 
