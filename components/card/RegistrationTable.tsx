@@ -24,7 +24,7 @@ export default function RegistrationTable({
         await updateStatusRegistration(ticketId, status);
     };
     return (
-        <div className="container mx-auto py-10">
+        <div className="container mx-auto py-5">
             <Table>
                 <TableHeader>
                     <TableRow className="bg-black text-white hover:bg-black ">
@@ -67,14 +67,19 @@ export default function RegistrationTable({
                                                   : "default"
                                           }
                                           className={
-                                              registration.status === "accepted"
-                                                  ? "bg-green-500"
-                                                  : registration.status ===
-                                                    "rejected"
-                                                  ? "bg-red-500"
-                                                  : ""
+                                              registration.status
+                                                  ? registration.status ===
+                                                    "accepted"
+                                                      ? "bg-green-500"
+                                                      : registration.status ===
+                                                        "rejected"
+                                                      ? "bg-red-500"
+                                                      : ""
+                                                  : "bg-green-500"
                                           }>
-                                          {registration.status}
+                                          {registration.status
+                                              ? registration.status
+                                              : "paid"}
                                       </Badge>
                                   </TableCell>
                                   <TableCell>

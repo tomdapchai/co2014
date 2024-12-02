@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use server";
 import pool from "../mysql";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
@@ -54,13 +55,12 @@ export async function createEvent(
                 capacity,
                 ticketType,
                 byUser,
-                null,
+                2,
                 ticketData,
             ]
         );
         const eventIdQuery = "SELECT @event_id AS event_id";
         const [eventResult] = await pool.execute(eventIdQuery);
-        console.log("eventResult", eventResult);
 
         return {
             success: true,
@@ -158,7 +158,6 @@ export async function getEventData(
         ticketType: isPaid == "paid" ? "paid" : "free",
     };
 
-    //console.log(eventData);
     return eventData;
 }
 
@@ -206,7 +205,7 @@ export const updateEvent = async (
                 capacity,
                 ticketType,
                 byUser,
-                null,
+                2,
                 ticketData,
             ]
         );
@@ -276,8 +275,6 @@ export const getAllEvents = async (): Promise<
         })
     );
 
-    console.log("eventData", eventsWithDetails);
-
     return eventsWithDetails as EventView[];
 };
 
@@ -286,15 +283,11 @@ export const getEventAttendees = async (
 ): Promise<Registration[] | { error: string }> => {
     const eventData = await getEventData(eventId);
 
-    console.log("eventData", eventData);
-
     const { registrations } = eventData;
 
     if (!registrations) {
         return { error: "No registrations found" };
     }
-
-    console.log("registrations", registrations);
 
     /* const newRegistrations = registrations.map((registration) => {}) */
 

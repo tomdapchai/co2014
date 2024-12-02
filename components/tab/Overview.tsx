@@ -14,6 +14,7 @@ import { Label } from "../ui/label";
 import { Registration } from "@/types";
 import RegistrationTable from "../card/RegistrationTable";
 import { useRouter } from "next/navigation";
+import { PromoCodeManager } from "../card/PromoCodeManager";
 const Overview = () => {
     const {
         eventData,
@@ -71,10 +72,9 @@ const Overview = () => {
                     />
                 </SheetContent>
             </Sheet>
-
-            <Label>Who's going</Label>
+            <PromoCodeManager />
             {/* display total number of successful register table (userId) */}
-            <Label>Registrations</Label>
+            <Label className="text-2xl font-bold">Registrations</Label>
             {registrationData && (
                 <RegistrationTable
                     registrations={registrationData}

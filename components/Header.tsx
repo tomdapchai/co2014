@@ -15,6 +15,7 @@ import { notificationProps } from "@/types";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { getNotifications } from "@/lib/actions/notification.action";
 
 const Header = () => {
     const [notifications, setNotifications] = useState<notificationProps[]>([]);
@@ -38,7 +39,15 @@ const Header = () => {
                 time: new Date("2024-09-03T10:00:00"),
             },
         ];
-        setNotifications(mockNotifications);
+        getNotifications(userId).then((data) => {
+            if ("error" in data) {
+                console.log(data.error);
+            } else {
+                console.log("noti", data);
+                setNotifications(data);
+            }
+        });
+        /* setNotifications(mockNotifications); */
     }, []);
 
     useEffect(() => {

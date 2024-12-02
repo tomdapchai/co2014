@@ -1,6 +1,6 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
-import { EventData } from "@/types";
+import { EventData, PromoCodeView, PromoCodeTrue } from "@/types";
 import { useAuth } from "./AuthContext";
 import {
     deleteEventById,
@@ -10,12 +10,20 @@ import {
 } from "@/lib/actions/event.action";
 import { Registration } from "@/types";
 import { getRegistrationData } from "@/lib/actions/register.action";
+import {
+    createPromoCodeEvent,
+    deletePromoCodeEvent,
+    getPromoCodeEvent,
+} from "@/lib/actions/promocode.action";
 interface EventContextType {
     eventId: string;
     eventData: EventData | null;
     registrationData: Registration[] | null;
     updateEventData: (data: EventData) => Promise<void>;
     deleteEvent: () => Promise<void>;
+    createPromoCodes: (promoCodes: PromoCodeView[]) => Promise<void>;
+    deletePromoCodes: (codeId: string) => Promise<void>;
+    promoCodes: PromoCodeTrue[] | null;
     isLoading: boolean;
 }
 
@@ -39,6 +47,7 @@ export const EventProvider = ({ children, eventId }: EventProviderProps) => {
     const [registrationData, setRegistrationData] = useState<
         Registration[] | null
     >(null);
+    const [promoCodes, setPromoCodes] = useState<PromoCodeTrue[] | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const { userId } = useAuth();
 
@@ -86,8 +95,35 @@ export const EventProvider = ({ children, eventId }: EventProviderProps) => {
         } catch (error) {}
     };
 
+    const createPromoCodes = async (promoCodes: PromoCodeView[]) => {
+        try {
+            promoCodes.map(async (promoCode) => {
+                await createPromoCodeEvent(eventId, promoCode);
+            });
+        } catch (error) {}
+    };
+
+    const viewPromoCodes = async () => {
+        try {
+            await getPromoCodeEvent(eventId).then((data) => {
+                if ("error" in data) {
+                    console.log(data.error);
+                } else {
+                    setPromoCodes(data);
+                }
+            });
+        } catch (error) {}
+    };
+
+    const deletePromoCodes = async (codeId: string) => {
+        try {
+            await deletePromoCodeEvent(codeId);
+        } catch (error) {}
+    };
+
     useEffect(() => {
         fetchEventData();
+        viewPromoCodes();
     }, [eventId]);
 
     return (
@@ -98,6 +134,9 @@ export const EventProvider = ({ children, eventId }: EventProviderProps) => {
                 registrationData,
                 updateEventData,
                 deleteEvent,
+                createPromoCodes,
+                deletePromoCodes,
+                promoCodes,
                 isLoading,
             }}>
             {children}

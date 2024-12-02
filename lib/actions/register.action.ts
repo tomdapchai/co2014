@@ -2,9 +2,9 @@
 import { revalidatePath } from "next/cache";
 import pool from "../mysql";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
-
+import { PromoCodeTrue, Transaction } from "@/types";
 import { v4 as uuidv4 } from "uuid";
-import { RegistrationData } from "@/types";
+import { PromoCodeView, RegistrationData } from "@/types";
 interface RegistrationResponse {
     ticketIds?: string[];
     message: string;
@@ -12,7 +12,9 @@ interface RegistrationResponse {
 
 export const registerEvent = async (
     data: RegistrationData,
-    path: string
+    path: string,
+    promoCode?: PromoCodeTrue[],
+    organizerId?: string
 ): Promise<RegistrationResponse | { error: string }> => {
     const {
         userId,
@@ -71,6 +73,100 @@ export const registerEvent = async (
         }
 
         return { ticketIds, message: "Registration successful" };
+    }
+
+    if (ticketType === "paid") {
+        // for each eventTicket, run for loop to register
+        let totalCost = multiType.reduce((acc, ticket) => {
+            return acc + ticket.quantity * ticket.price;
+        }, 0);
+
+        // create transaction
+        const content = multiType.map((ticket) => {
+            return {
+                ticketName: ticket.name,
+                quantity: ticket.quantity,
+                price: ticket.price,
+            };
+        });
+
+        await pool.execute("INSERT IGNORE INTO customer (ID_user) VALUE (?) ", [
+            userId,
+        ]);
+        const [transaction] = await pool.execute<ResultSetHeader>(
+            "INSERT INTO transaction (content, method, status) VALUE (?, ?, ?)",
+            [JSON.stringify(content), "credit", "pending"]
+        );
+
+        const transactionId = transaction.insertId;
+
+        const [transForTicket] = await pool.execute(
+            "INSERT INTO trans_for_ticket (ID_transaction, ID_receiver, ID_sender) VALUE (?, ?, ?)",
+            [transactionId, organizerId, userId]
+        );
+
+        console.log("content: ", content, "totalCost: ", totalCost);
+
+        if (promoCode && promoCode.length > 0) {
+            // iterate all promoCode, add up the discount then recalculate totalCost
+            promoCode.forEach((code) => {
+                totalCost -= (code.discount / 100) * totalCost;
+            });
+
+            if (totalCost < 0) {
+                totalCost = 0;
+            }
+
+            const wait = promoCode.map(async (code) => {
+                await pool.execute(
+                    "INSERT INTO apply_promocode (ID_transaction, ID_code) VALUE (?, ?)",
+                    [transactionId, code.id]
+                );
+
+                await pool.execute(
+                    "UPDATE promo_code SET quantity = quantity - 1 WHERE ID_code = ?",
+                    [code.id]
+                );
+            });
+
+            await Promise.all(wait);
+            console.log("Promo", promoCode);
+        }
+
+        console.log("Total cost after promo: ", totalCost);
+
+        // lastly, update amount in transaction
+        await pool.execute(
+            "UPDATE transaction SET amount = ? WHERE ID_transaction = ?",
+            [totalCost, transactionId]
+        );
+
+        // now we can register the ticket
+        const waitRegister = multiType.map(async (ticket) => {
+            for (let i = 0; i < ticket.quantity; i++) {
+                let ticketId = uuidv4();
+                await pool.execute(
+                    "INSERT INTO ticket_registered (ID_ticket, hasCheckedIn, ID_event, type) VALUE (?, ?, ?, ?)",
+                    [ticketId, false, eventId, ticket.name]
+                );
+
+                if (ticket.price > 0) {
+                    await pool.execute(
+                        "INSERT INTO paid_ticket (ID_ticket, ID_transaction) VALUE (?, ?)",
+                        [ticketId, transactionId]
+                    );
+                }
+
+                if (ticket.price == 0) {
+                    await pool.execute(
+                        "INSERT INTO free_ticket (ID_ticket, approval_status, ID_user) VALUE (?, ?, ?)",
+                        [ticketId, "pending", userId]
+                    );
+                }
+            }
+        });
+
+        await Promise.all(waitRegister);
     }
 
     return { message: "wait for implement" };
@@ -137,17 +233,19 @@ export async function updateStatusRegistration(
             "SELECT * FROM ticket_registered WHERE ID_ticket = ?",
             [ticketId]
         );
+
+        const [ticketType] = await pool.execute(
+            "SELECT * FROM ticket_type WHERE ID_event = ?",
+            [(ticket as RowDataPacket)[0].ID_event]
+        );
+
+        const { cost } = (ticketType as RowDataPacket)[0];
         if ((ticket as RowDataPacket).length === 0) {
             return { error: "Ticket not found" };
         }
-        if ((ticket as RowDataPacket)[0].type === "Free") {
+        if (cost == 0) {
             await pool.execute(
                 "UPDATE free_ticket SET approval_status = ? WHERE ID_ticket = ?",
-                [status, ticketId]
-            );
-        } else {
-            await pool.execute(
-                "UPDATE paid_ticket SET approval_status = ? WHERE ID_ticket = ?",
                 [status, ticketId]
             );
         }
@@ -155,3 +253,22 @@ export async function updateStatusRegistration(
         console.error("Error updating registration status:", error);
     }
 }
+
+export const getPaidEventRegistration = async (
+    userId: string,
+    eventId: string,
+    name: string
+): Promise<number | { error: string }> => {
+    try {
+        const [res] = await pool.execute(
+            "SELECT total_ticket_registered(?, ?, ?) as total",
+            [userId, eventId, name]
+        );
+
+        const result = (res as RowDataPacket)[0].total;
+        return result;
+    } catch (error) {
+        console.error("Error getting paid event registration:", error);
+        return { error: "Error getting paid event registration" };
+    }
+};

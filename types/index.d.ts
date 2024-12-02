@@ -68,6 +68,13 @@ export interface RegistrationData {
     eventTickets: TicketDetail[];
 }
 
+export interface Transaction {
+    content: JSON;
+    status: "Pending" | "Completed" | "Failed";
+    method: "credit card" | "momo";
+    amount: number;
+}
+
 export type Product = {
     name: string;
     price: number;
@@ -98,4 +105,15 @@ export interface UserData {
         country?: string;
     };
     dob?: string;
+}
+
+export interface PromoCodeView {
+    code: string;
+    discount: number;
+    quantity: number;
+    expiryDate: string;
+}
+
+export interface PromoCodeTrue extends PromoCodeView {
+    id: string;
 }

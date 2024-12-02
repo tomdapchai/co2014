@@ -18,6 +18,11 @@ export const getRegisteredEvents = async (
         [userId]
     );
 
+    const [paidRegistration] = await pool.execute(
+        "SELECT * FROM ticket_registered tr JOIN paid_ticket pt ON tr.ID_ticket = pt.ID_ticket JOIN trans_for_ticket tt ON pt.ID_transaction = tt.ID_transaction WHERE ID_sender = ?",
+        [userId]
+    );
+
     const [hostedEvents] = await pool.execute(
         "SELECT * FROM event WHERE ID_organizer = ?",
         [userId]
@@ -30,6 +35,11 @@ export const getRegisteredEvents = async (
     });
 
     (hostedEvents as RowDataPacket[]).forEach((data) => {
+        const { ID_event } = data;
+        if (!regEventIds.includes(ID_event)) regEventIds.push(ID_event);
+    });
+
+    (paidRegistration as RowDataPacket[]).forEach((data) => {
         const { ID_event } = data;
         if (!regEventIds.includes(ID_event)) regEventIds.push(ID_event);
     });

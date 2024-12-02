@@ -2,7 +2,6 @@ import React from "react";
 import { EventProvider } from "@/context/EventContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Overview from "@/components/tab/Overview";
-import Guests from "@/components/tab/Guests";
 import Registrations from "@/components/tab/Registrations";
 import Insights from "@/components/tab/Insights";
 
