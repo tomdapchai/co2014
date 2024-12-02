@@ -15,6 +15,8 @@ import {
     deletePromoCodeEvent,
     getPromoCodeEvent,
 } from "@/lib/actions/promocode.action";
+import { TicketSoldView } from "@/types";
+import { getEventRevenue } from "@/lib/actions/event.action";
 interface EventContextType {
     eventId: string;
     eventData: EventData | null;
@@ -24,6 +26,7 @@ interface EventContextType {
     createPromoCodes: (promoCodes: PromoCodeView[]) => Promise<void>;
     deletePromoCodes: (codeId: string) => Promise<void>;
     promoCodes: PromoCodeTrue[] | null;
+    revenueData: TicketSoldView[];
     isLoading: boolean;
 }
 
@@ -49,6 +52,7 @@ export const EventProvider = ({ children, eventId }: EventProviderProps) => {
     >(null);
     const [promoCodes, setPromoCodes] = useState<PromoCodeTrue[] | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [revenueData, setRevenueData] = useState<TicketSoldView[]>([]);
     const { userId } = useAuth();
 
     const fetchEventData = async () => {
@@ -121,9 +125,22 @@ export const EventProvider = ({ children, eventId }: EventProviderProps) => {
         } catch (error) {}
     };
 
+    const fetchRevenueData = async () => {
+        try {
+            await getEventRevenue(eventId).then((data) => {
+                if ("error" in data) {
+                    console.log(data.error);
+                } else {
+                    setRevenueData(data);
+                }
+            });
+        } catch (error) {}
+    };
+
     useEffect(() => {
         fetchEventData();
         viewPromoCodes();
+        fetchRevenueData();
     }, [eventId]);
 
     return (
@@ -137,6 +154,7 @@ export const EventProvider = ({ children, eventId }: EventProviderProps) => {
                 createPromoCodes,
                 deletePromoCodes,
                 promoCodes,
+                revenueData,
                 isLoading,
             }}>
             {children}

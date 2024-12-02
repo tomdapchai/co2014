@@ -117,3 +117,11 @@ export interface PromoCodeView {
 export interface PromoCodeTrue extends PromoCodeView {
     id: string;
 }
+
+export interface TicketSoldView {
+    ticketType: string;
+    ticketPrice: number;
+    ticketQuantity: number;
+    ticketSold: number;
+    totalRevenue: number;
+}

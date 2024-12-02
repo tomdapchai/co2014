@@ -437,21 +437,21 @@ const page = ({ params }: { params: { eventId: string } }) => {
                                     onCancel={handleOnCancel}
                                 />
                             ))}
-                            {userPaidRegistered.map((data) => (
-                                <Card className="w-[300px]">
-                                    <CardContent>
-                                        <p>
-                                            {data.ticketName} - {data.amount}{" "}
-                                            registered
-                                        </p>
-                                    </CardContent>
-                                </Card>
-                            ))}
                         </div>
                     </div>
                 ) : (
                     ""
                 )}
+                {userPaidRegistered.length > 0 &&
+                    userPaidRegistered.map((data) => (
+                        <Card className="w-[300px]">
+                            <CardContent>
+                                <p>
+                                    {data.ticketName} - {data.amount} registered
+                                </p>
+                            </CardContent>
+                        </Card>
+                    ))}
                 <div className="flex flex-col space-y-2">
                     {/* register form here, after registered quantity is lowered */}
                     {isAvailable ? (

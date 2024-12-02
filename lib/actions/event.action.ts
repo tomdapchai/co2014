@@ -2,7 +2,7 @@
 "use server";
 import pool from "../mysql";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
-import { EventData, EventView, Registration } from "@/types";
+import { EventData, EventView, Registration, TicketSoldView } from "@/types";
 import { getRegistrationData } from "./register.action";
 import { getUserData } from "./user.action";
 import { title } from "process";
@@ -292,4 +292,30 @@ export const getEventAttendees = async (
     /* const newRegistrations = registrations.map((registration) => {}) */
 
     return registrations;
+};
+
+export const getEventRevenue = async (
+    eventId: string
+): Promise<TicketSoldView[] | { error: string }> => {
+    try {
+        const [res] = await pool.execute("CALL GetEventTicketTypeRevenue(?)", [
+            eventId,
+        ]);
+
+        console.log("res rev", res);
+
+        const result = (res as RowDataPacket[])[0].map((row) => {
+            return {
+                ticketType: row.ticket_type,
+                ticketPrice: row.ticket_price,
+                ticketQuantity: row.total_ticket_quantity,
+                ticketSold: row.tickets_sold,
+                totalRevenue: row.total_revenue,
+            };
+        });
+        console.log("Event revenue:", result);
+        return result;
+    } catch (error) {
+        console.error("Error getting event revenue:", error);
+    }
 };
