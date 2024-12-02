@@ -2,13 +2,20 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { EventData } from "@/types";
 import { useAuth } from "./AuthContext";
-import { getEventAttendees, getEventData } from "@/lib/actions/event.action";
+import {
+    deleteEventById,
+    getEventAttendees,
+    getEventData,
+    updateEvent,
+} from "@/lib/actions/event.action";
 import { Registration } from "@/types";
 import { getRegistrationData } from "@/lib/actions/register.action";
 interface EventContextType {
+    eventId: string;
     eventData: EventData | null;
     registrationData: Registration[] | null;
     updateEventData: (data: EventData) => Promise<void>;
+    deleteEvent: () => Promise<void>;
     isLoading: boolean;
 }
 
@@ -65,46 +72,18 @@ export const EventProvider = ({ children, eventId }: EventProviderProps) => {
 
     const updateEventData = async (updatedData: EventData) => {
         try {
-            /* With real database:
-            const db = await mysql.createConnection({
-                host: 'localhost',
-                user: 'your_username',
-                password: 'your_password',
-                database: 'your_database'
-            });
-            
-            await db.execute(
-                `UPDATE events SET 
-                    name = ?, type = ?, start = ?, end = ?, 
-                    description = ?, location = ?, guideline = ?,
-                    capacity = ?, ticket_type = ?, max_tickets_per_user = ?
-                WHERE id = ?`,
-                [
-                    updatedData.name, updatedData.type, updatedData.start,
-                    updatedData.end, updatedData.description, updatedData.location,
-                    updatedData.guideline, updatedData.capacity, updatedData.ticketType,
-                    updatedData.maxTicketsPerUser, eventId
-                ]
-            );
-
-            // Update tickets
-            await db.execute('DELETE FROM tickets WHERE event_id = ?', [eventId]);
-            
-            for (const ticket of updatedData.tickets || []) {
-                await db.execute(
-                    `INSERT INTO tickets (event_id, name, price, description, amount) 
-                     VALUES (?, ?, ?, ?, ?)`,
-                    [eventId, ticket.ticketName, ticket.ticketPrice, 
-                     ticket.ticketDescription, ticket.ticketQuantity]
-                );
-            }
-            */
-
+            await updateEvent(eventId, updatedData);
             setEventData(updatedData);
         } catch (error) {
             console.error("Failed to update event:", error);
             throw error;
         }
+    };
+
+    const deleteEvent = async () => {
+        try {
+            await deleteEventById(eventId);
+        } catch (error) {}
     };
 
     useEffect(() => {
@@ -113,7 +92,14 @@ export const EventProvider = ({ children, eventId }: EventProviderProps) => {
 
     return (
         <EventContext.Provider
-            value={{ eventData, registrationData, updateEventData, isLoading }}>
+            value={{
+                eventId,
+                eventData,
+                registrationData,
+                updateEventData,
+                deleteEvent,
+                isLoading,
+            }}>
             {children}
         </EventContext.Provider>
     );

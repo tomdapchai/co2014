@@ -35,14 +35,13 @@ const EditEventForm = ({ eventData, onSubmit }: EditEventFormProps) => {
     const [isPaid, setIsPaid] = useState(false);
 
     useEffect(() => {
-        if (eventData.capacity != 0) {
-            setIsLimited(true);
-        }
+        // Initialize isLimited based on eventData capacity
+        setIsLimited(eventData.capacity !== 0);
+    }, [eventData.capacity]);
 
-        if (eventData.ticketType === "paid") {
-            setIsPaid(true);
-        }
-    }, []);
+    useEffect(() => {
+        setIsPaid(eventData.ticketType === "paid");
+    }, [eventData.ticketType]);
 
     const form = useForm<z.infer<typeof createEventSchema>>({
         resolver: zodResolver(createEventSchema),
@@ -231,25 +230,23 @@ const EditEventForm = ({ eventData, onSubmit }: EditEventFormProps) => {
                             { value: "limited", label: "Limited" },
                         ]}
                         defaultValue={
-                            eventData.capacity != 0 ? "limited" : "unlimited"
+                            eventData.capacity === 0 ? "unlimited" : "limited"
                         }
                         onChange={(value) => {
-                            if (value === "unlimited") {
-                                form.setValue("capacity", 0);
-                            }
-                            setIsLimited(value === "limited");
+                            const isLimitedValue = value === "limited";
+                            setIsLimited(isLimitedValue);
+                            form.setValue("capacity", isLimitedValue ? 1 : 0);
                         }}
                     />
-                    {isLimited ? (
+                    <FormMessage className="text-red-500" />
+                    {isLimited && (
                         <InputNumber
                             control={form.control}
                             name="capacity"
-                            defaultValue={1}
+                            defaultValue={eventData.capacity || 1}
                             min={1}
                             extraClass="text-sm"
                         />
-                    ) : (
-                        ""
                     )}
                 </div>
 

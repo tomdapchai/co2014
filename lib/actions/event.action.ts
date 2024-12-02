@@ -30,69 +30,47 @@ export async function createEvent(
         tickets,
     } = data;
 
-    const queryEvent =
-        "INSERT INTO event (name, type, event_logo, start_date_time, end_date_time, location, guideline, description, capacity, isPaid, max_ticket_per_register) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-    const queryTicket = `INSERT INTO ticket_type (ID_event,type,cost,quantity,description) VALUES (?, ?, ?, ?, ?)`;
-
+    const ticketData = tickets
+        .map(
+            (ticket) =>
+                `${ticket.ticketName}|${ticket.ticketPrice}|${
+                    ticket.ticketQuantity
+                }|${ticket.ticketDescription || ""}`
+        )
+        .join(";");
     try {
-        // Convert capacity to number if it's "unlimited" or a string number
-
-        const organizerId = parseInt(byUser);
-
-        if (isNaN(organizerId)) {
-            throw new Error("Invalid organizer ID");
-        }
-
-        // Use parameterized values to prevent SQL injection and handle string escaping
-        const [result] = await pool.execute(queryEvent, [
-            name,
-            type,
-            logo,
-            start,
-            end,
-            location,
-            guideline || null,
-            description || null,
-            capacity,
-            ticketType,
-            maxTicketsPerUser,
-        ]);
-
-        const eventId = (result as ResultSetHeader).insertId;
-
         await pool.execute(
-            "INSERT IGNORE INTO organizer (ID_user) VALUES (?)",
-            [organizerId]
+            "CALL InsertEvent(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, @event_id)",
+            [
+                name,
+                start,
+                end,
+                maxTicketsPerUser,
+                location,
+                description,
+                guideline,
+                logo,
+                type,
+                capacity,
+                ticketType,
+                byUser,
+                null,
+                ticketData,
+            ]
         );
+        const eventIdQuery = "SELECT @event_id AS event_id";
+        const [eventResult] = await pool.execute(eventIdQuery);
+        console.log("eventResult", eventResult);
 
-        await pool.execute(
-            "UPDATE event SET ID_organizer = ? WHERE ID_event = ?",
-            [organizerId, eventId]
-        );
-
-        // Insert tickets if they exist
-        if (tickets && tickets.length > 0) {
-            await Promise.all(
-                tickets.map((ticket) =>
-                    pool.execute(queryTicket, [
-                        eventId,
-                        ticket.ticketName,
-                        ticket.ticketPrice,
-                        ticket.ticketQuantity,
-                        ticket.ticketDescription || null, // Handle optional field
-                    ])
-                )
-            );
-        }
-
-        return { success: true, eventId: eventId.toString() };
+        return {
+            success: true,
+            eventId: (eventResult as RowDataPacket)[0].event_id,
+        };
     } catch (error) {
         console.error("Error creating event:", error);
         return { success: false };
     }
 }
-
 // do get/post request to get event data from DB here
 export async function getEventData(
     eventId: string
@@ -184,10 +162,72 @@ export async function getEventData(
     return eventData;
 }
 
-export const updateEventData = async (eventId: string, data: EventData) => {};
+export const updateEvent = async (
+    eventId: string,
+    data: EventData
+): Promise<{ success: boolean }> => {
+    const {
+        name,
+        type,
+        logo,
+        start,
+        end,
+        location,
+        guideline,
+        description,
+        capacity,
+        ticketType,
+        maxTicketsPerUser,
+        byUser,
+        tickets,
+    } = data;
+    const ticketData = tickets
+        .map(
+            (ticket) =>
+                `${ticket.ticketName}|${ticket.ticketPrice}|${
+                    ticket.ticketQuantity
+                }|${ticket.ticketDescription || ""}`
+        )
+        .join(";");
+    try {
+        await pool.execute(
+            "CALL UpdateEvent(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [
+                Number(eventId),
+                name,
+                start,
+                end,
+                maxTicketsPerUser,
+                location,
+                description,
+                guideline,
+                logo,
+                type,
+                capacity,
+                ticketType,
+                byUser,
+                null,
+                ticketData,
+            ]
+        );
 
-export const deleteEvent = async (eventId: string) => {
-    await pool.execute("DELETE FROM event WHERE ID_event = ?", [eventId]);
+        return { success: true };
+    } catch (error) {
+        console.error("Error updating event:", error);
+        return { success: false };
+    }
+};
+
+export const deleteEventById = async (
+    eventId: string
+): Promise<{ success: boolean }> => {
+    try {
+        await pool.execute("CALL DeleteEvent(?)", [Number(eventId)]);
+        return { success: true };
+    } catch (error) {
+        console.error("Error deleting event:", error);
+        return { success: false };
+    }
 };
 
 export const getAllEvents = async (): Promise<

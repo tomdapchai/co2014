@@ -7,9 +7,10 @@ import { formatDuration } from "@/lib/utils";
 interface EventSummaryProps {
     eventData: EventData;
     onEdit: () => void;
+    onDelete: () => void;
 }
 
-const EventSummary = ({ eventData, onEdit }: EventSummaryProps) => {
+const EventSummary = ({ eventData, onEdit, onDelete }: EventSummaryProps) => {
     return (
         <Card className="w-[600px] flex space-x-4 justify-start items-center px-2 py-2">
             <Image
@@ -31,9 +32,14 @@ const EventSummary = ({ eventData, onEdit }: EventSummaryProps) => {
                             : `${eventData.tickets?.length} ticket types`}{" "}
                     </p>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="flex justify-between items-center space-x-4">
                     <Button onClick={onEdit} className="">
                         Edit Event
+                    </Button>
+                    <Button
+                        onClick={onDelete}
+                        className="bg-red-500 hover:bg-red-500/90">
+                        Delete Event
                     </Button>
                 </CardFooter>
             </div>

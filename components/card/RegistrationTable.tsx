@@ -27,80 +27,90 @@ export default function RegistrationTable({
         <div className="container mx-auto py-10">
             <Table>
                 <TableHeader>
-                    <TableRow>
-                        <TableHead>User ID</TableHead>
-                        <TableHead>Ticket ID</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Checked In</TableHead>
-                        {type === "full" && <TableHead>Actions</TableHead>}
+                    <TableRow className="bg-black text-white hover:bg-black ">
+                        <TableHead className="text-white">User ID</TableHead>
+                        <TableHead className="text-white">Ticket ID</TableHead>
+                        <TableHead className="text-white">Type</TableHead>
+                        <TableHead className="text-white">Status</TableHead>
+                        <TableHead className="text-white">Checked In</TableHead>
+                        {type === "full" && (
+                            <TableHead className="text-white">
+                                Actions
+                            </TableHead>
+                        )}
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {registrations.map((registration, index) => (
-                        <TableRow key={index}>
-                            <TableCell>{registration.userId}</TableCell>
-                            <TableCell>{registration.ticketId}</TableCell>
-                            <TableCell>
-                                <Badge
-                                    variant={
-                                        registration.type === "paid"
-                                            ? "default"
-                                            : "secondary"
-                                    }>
-                                    {registration.type}
-                                </Badge>
-                            </TableCell>
-                            <TableCell>
-                                <Badge
-                                    variant={
-                                        registration.status === "accepted"
-                                            ? "default"
-                                            : registration.status === "rejected"
-                                            ? "destructive"
-                                            : "default"
-                                    }
-                                    className={
-                                        registration.status === "accepted"
-                                            ? "bg-green-500"
-                                            : registration.status === "rejected"
-                                            ? "bg-red-500"
-                                            : ""
-                                    }>
-                                    {registration.status}
-                                </Badge>
-                            </TableCell>
-                            <TableCell>
-                                {registration.status == "accepted" &&
-                                    (registration.hasChekedIn ? "Yes" : "No")}
-                            </TableCell>
-                            {type === "full" &&
-                                registration.status == "pending" && (
-                                    <TableCell className="flex space-x-4">
-                                        <Button
-                                            className="bg-green-500 hover:bg-green-500/90 text-white rounded"
-                                            onClick={() =>
-                                                handleStatusChange(
-                                                    registration.ticketId,
-                                                    "accepted"
-                                                )
-                                            }>
-                                            Approve
-                                        </Button>
-                                        <Button
-                                            className="bg-red-500 hover:bg-red-500/90 text-white rounded"
-                                            onClick={() =>
-                                                handleStatusChange(
-                                                    registration.ticketId,
+                    {registrations.length > 0
+                        ? registrations.map((registration, index) => (
+                              <TableRow key={index}>
+                                  <TableCell>{registration.userId}</TableCell>
+                                  <TableCell>{registration.ticketId}</TableCell>
+                                  <TableCell>
+                                      <Badge
+                                          variant={
+                                              registration.type === "paid"
+                                                  ? "default"
+                                                  : "secondary"
+                                          }>
+                                          {registration.type}
+                                      </Badge>
+                                  </TableCell>
+                                  <TableCell>
+                                      <Badge
+                                          variant={
+                                              registration.status === "accepted"
+                                                  ? "default"
+                                                  : registration.status ===
                                                     "rejected"
-                                                )
-                                            }>
-                                            Reject
-                                        </Button>
-                                    </TableCell>
-                                )}
-                        </TableRow>
-                    ))}
+                                                  ? "destructive"
+                                                  : "default"
+                                          }
+                                          className={
+                                              registration.status === "accepted"
+                                                  ? "bg-green-500"
+                                                  : registration.status ===
+                                                    "rejected"
+                                                  ? "bg-red-500"
+                                                  : ""
+                                          }>
+                                          {registration.status}
+                                      </Badge>
+                                  </TableCell>
+                                  <TableCell>
+                                      {registration.status == "accepted" &&
+                                          (registration.hasChekedIn
+                                              ? "Yes"
+                                              : "No")}
+                                  </TableCell>
+                                  {type === "full" &&
+                                      registration.status == "pending" && (
+                                          <TableCell className="flex space-x-4">
+                                              <Button
+                                                  className="bg-green-500 hover:bg-green-500/90 text-white rounded"
+                                                  onClick={() =>
+                                                      handleStatusChange(
+                                                          registration.ticketId,
+                                                          "accepted"
+                                                      )
+                                                  }>
+                                                  Approve
+                                              </Button>
+                                              <Button
+                                                  className="bg-red-500 hover:bg-red-500/90 text-white rounded"
+                                                  onClick={() =>
+                                                      handleStatusChange(
+                                                          registration.ticketId,
+                                                          "rejected"
+                                                      )
+                                                  }>
+                                                  Reject
+                                              </Button>
+                                          </TableCell>
+                                      )}
+                              </TableRow>
+                          ))
+                        : "No registrations yet"}
                 </TableBody>
             </Table>
         </div>
