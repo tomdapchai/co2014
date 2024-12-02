@@ -18,8 +18,18 @@ export const getRegisteredEvents = async (
         [userId]
     );
 
+    const [hostedEvents] = await pool.execute(
+        "SELECT * FROM event WHERE ID_organizer = ?",
+        [userId]
+    );
+
     const regEventIds: any[] = [];
     (freeRegistrations as RowDataPacket[]).forEach((data) => {
+        const { ID_event } = data;
+        if (!regEventIds.includes(ID_event)) regEventIds.push(ID_event);
+    });
+
+    (hostedEvents as RowDataPacket[]).forEach((data) => {
         const { ID_event } = data;
         if (!regEventIds.includes(ID_event)) regEventIds.push(ID_event);
     });
@@ -68,7 +78,6 @@ export const getRegisteredEvents = async (
     console.log("regData", regData);
 
     return regData;
-    return { error: "Not implemented" };
 };
 
 // with personal

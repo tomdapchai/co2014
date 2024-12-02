@@ -2,8 +2,12 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { EventData } from "@/types";
 import { useAuth } from "./AuthContext";
+import { getEventAttendees, getEventData } from "@/lib/actions/event.action";
+import { Registration } from "@/types";
+import { getRegistrationData } from "@/lib/actions/register.action";
 interface EventContextType {
     eventData: EventData | null;
+    registrationData: Registration[] | null;
     updateEventData: (data: EventData) => Promise<void>;
     isLoading: boolean;
 }
@@ -25,68 +29,33 @@ interface EventProviderProps {
 
 export const EventProvider = ({ children, eventId }: EventProviderProps) => {
     const [eventData, setEventData] = useState<EventData | null>(null);
+    const [registrationData, setRegistrationData] = useState<
+        Registration[] | null
+    >(null);
     const [isLoading, setIsLoading] = useState(true);
     const { userId } = useAuth();
 
     const fetchEventData = async () => {
         setIsLoading(true);
+
         try {
-            /* With real database:
-            const db = await mysql.createConnection({
-                host: 'localhost',
-                user: 'your_username',
-                password: 'your_password',
-                database: 'your_database'
-            });
-            
-            const [rows] = await db.execute(
-                'SELECT * FROM events WHERE id = ?',
-                [eventId]
-            );
-            
-            const eventData = rows[0];
-            
-            // Fetch related tickets
-            const [tickets] = await db.execute(
-                'SELECT * FROM tickets WHERE event_id = ?',
-                [eventId]
-            );
-            
-            eventData.tickets = tickets;
-            */
-
             // Mock data for now
-            setEventData({
-                name: "test",
-                logo: "/assets/eventLogo.png",
-                type: "public",
-                start: "2025-10-31T17:25",
-                end: "2025-10-31T17:55",
-                description: "description",
-                location: "location",
-                guideline: "guideline",
-                capacity: 20,
-                ticketType: "paid",
-                tickets: [
-                    {
-                        ticketName: "Free",
-                        ticketPrice: 0,
-                        ticketDescription: "Free tickets for everyone",
-                        ticketQuantity: 10,
-                    },
-                    {
-                        ticketName: "VIP",
-                        ticketPrice: 10000,
-                        ticketDescription: "Vip ticket for riches",
-                        ticketQuantity: 9,
-                    },
-                ],
-                maxTicketsPerUser: 10,
-                registrations: [],
-                byUser: userId,
+            await getEventData(eventId).then((data) => {
+                if ("error" in data) {
+                    console.log(data.error);
+                } else {
+                    setEventData(data);
+                }
             });
 
-            console.log("Fetched", eventData);
+            await getEventAttendees(eventId).then((data) => {
+                if ("error" in data) {
+                    console.log(data.error);
+                } else {
+                    console.log("registrationData", data);
+                    setRegistrationData(data);
+                }
+            });
         } catch (error) {
             console.error("Failed to fetch event:", error);
         } finally {
@@ -144,7 +113,7 @@ export const EventProvider = ({ children, eventId }: EventProviderProps) => {
 
     return (
         <EventContext.Provider
-            value={{ eventData, updateEventData, isLoading }}>
+            value={{ eventData, registrationData, updateEventData, isLoading }}>
             {children}
         </EventContext.Provider>
     );

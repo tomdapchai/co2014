@@ -38,7 +38,7 @@ const EventCard = ({
     byUser,
     currentUserId,
 }: Props) => {
-    const isHost = byUser.id === currentUserId;
+    const isHost = byUser.id == currentUserId;
     return (
         <Link href={`/event/${id}`} className="w-full">
             <Card className="w-full">

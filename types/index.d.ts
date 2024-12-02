@@ -49,8 +49,7 @@ export interface Registration {
     userId: string;
     ticketId: string;
     type: "free" | "paid";
-    ticketName?: string;
-    status: "pending" | "approved" | "rejected";
+    status: "pending" | "accepted" | "rejected";
     hasChekedIn: boolean;
 }
 
@@ -84,7 +83,7 @@ export interface TransactionData {
 }
 
 // transaction logic: user pay, click proceed, transaction status still pending. Host check if the user already sent => go to management to approve the payment.
-// After 24hrs, the transaction will be automatically approved.
+// After 24hrs, the transaction will be automatically accepted.
 // If user decide to cancel the payment, status would remain "canceled" 4ever.
 
 export interface UserData {

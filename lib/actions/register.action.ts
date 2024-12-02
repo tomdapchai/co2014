@@ -126,3 +126,32 @@ export async function cancelRegistration(
         return { error: "Error cancelling registration" };
     }
 }
+
+export async function updateStatusRegistration(
+    ticketId: string,
+    status: string
+) {
+    try {
+        console.log("ticketId & status", ticketId, status);
+        const [ticket] = await pool.execute(
+            "SELECT * FROM ticket_registered WHERE ID_ticket = ?",
+            [ticketId]
+        );
+        if ((ticket as RowDataPacket).length === 0) {
+            return { error: "Ticket not found" };
+        }
+        if ((ticket as RowDataPacket)[0].type === "Free") {
+            await pool.execute(
+                "UPDATE free_ticket SET approval_status = ? WHERE ID_ticket = ?",
+                [status, ticketId]
+            );
+        } else {
+            await pool.execute(
+                "UPDATE paid_ticket SET approval_status = ? WHERE ID_ticket = ?",
+                [status, ticketId]
+            );
+        }
+    } catch (error) {
+        console.error("Error updating registration status:", error);
+    }
+}

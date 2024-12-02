@@ -20,7 +20,7 @@ const page = ({ params }: { params: { transactionId: string } }) => {
     // list of promo codes that user can use
 
     const onDone = () => {
-        // mark transaction as paid for host to view then approved (cannot reject)
+        // mark transaction as paid for host to view then accepted (cannot reject)
         console.log("Transaction done");
     };
     const onCanceled = () => {

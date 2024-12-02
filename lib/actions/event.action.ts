@@ -1,8 +1,10 @@
 "use server";
 import pool from "../mysql";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
-import { EventData, Registration } from "@/types";
+import { EventData, EventView, Registration } from "@/types";
 import { getRegistrationData } from "./register.action";
+import { getUserData } from "./user.action";
+import { title } from "process";
 
 type createEventMessage = {
     success: boolean;
@@ -186,4 +188,75 @@ export const updateEventData = async (eventId: string, data: EventData) => {};
 
 export const deleteEvent = async (eventId: string) => {
     await pool.execute("DELETE FROM event WHERE ID_event = ?", [eventId]);
+};
+
+export const getAllEvents = async (): Promise<
+    EventView[] | { error: string }
+> => {
+    const [events] = await pool.execute("SELECT * FROM event");
+    if ((events as RowDataPacket).length === 0) {
+        return { error: "No events found" };
+    }
+
+    // Use `map` to handle asynchronous transformations
+    const eventsWithDetails = await Promise.all(
+        (events as RowDataPacket).map(async (event: any) => {
+            const { ID_event, ID_organizer } = event;
+
+            // Fetch event data
+            const eventData = await getEventData(ID_event);
+            const { registrations } = eventData;
+            event.attendees = registrations ? registrations.length : 0;
+
+            // Fetch organizer data
+            const userData = await getUserData(ID_organizer);
+
+            const {
+                username = "Unknown",
+                name: userName = "Unknown Organizer",
+                avatar = "",
+            } = "error" in userData ? {} : userData;
+
+            return {
+                id: event.ID_event,
+                title: event.name,
+                logo: event.event_logo,
+                start: new Date(event.start_date_time)
+                    .toISOString()
+                    .slice(0, 16),
+                end: new Date(event.end_date_time).toISOString().slice(0, 16),
+                location: event.location,
+                attendees: event.attendees,
+                byUser: {
+                    id: ID_organizer,
+                    name: userName || username,
+                    avatar,
+                },
+            };
+        })
+    );
+
+    console.log("eventData", eventsWithDetails);
+
+    return eventsWithDetails as EventView[];
+};
+
+export const getEventAttendees = async (
+    eventId: string
+): Promise<Registration[] | { error: string }> => {
+    const eventData = await getEventData(eventId);
+
+    console.log("eventData", eventData);
+
+    const { registrations } = eventData;
+
+    if (!registrations) {
+        return { error: "No registrations found" };
+    }
+
+    console.log("registrations", registrations);
+
+    /* const newRegistrations = registrations.map((registration) => {}) */
+
+    return registrations;
 };

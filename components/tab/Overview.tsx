@@ -11,9 +11,11 @@ import EditEventForm from "../form/EditEventForm";
 import { useEventContext } from "@/context/EventContext";
 import { EventData } from "@/types";
 import { Label } from "../ui/label";
-
+import { Registration } from "@/types";
+import RegistrationTable from "../card/RegistrationTable";
 const Overview = () => {
-    const { eventData, updateEventData, isLoading } = useEventContext();
+    const { eventData, registrationData, updateEventData, isLoading } =
+        useEventContext();
     const [isEditing, setIsEditing] = useState(false);
 
     if (isLoading) {
@@ -56,6 +58,12 @@ const Overview = () => {
             <Label>Who's going</Label>
             {/* display total number of successful register table (userId) */}
             <Label>Registrations</Label>
+            {registrationData && (
+                <RegistrationTable
+                    registrations={registrationData}
+                    type="overview"
+                />
+            )}
             {/* display total number of register table (userId) */}
         </div>
     );

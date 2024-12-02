@@ -18,7 +18,6 @@ const page = ({ params }: { params: { eventId: string } }) => {
                 className="w-full flex flex-col justify-center items-center">
                 <TabsList>
                     <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="guests">Guests</TabsTrigger>
                     <TabsTrigger value="registrations">
                         Registrations
                     </TabsTrigger>
@@ -26,9 +25,6 @@ const page = ({ params }: { params: { eventId: string } }) => {
                 </TabsList>
                 <TabsContent value="overview">
                     <Overview />
-                </TabsContent>
-                <TabsContent value="guests">
-                    <Guests />
                 </TabsContent>
                 <TabsContent value="registrations">
                     <Registrations />
