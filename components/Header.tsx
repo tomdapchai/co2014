@@ -44,7 +44,9 @@ const Header = () => {
                 console.log(data.error);
             } else {
                 console.log("noti", data);
-                setNotifications(data);
+                data.sort((a, b) => (Number(a.id) > Number(b.id) ? -1 : 1));
+                const newData = data.slice(0, 10);
+                setNotifications(newData);
             }
         });
         /* setNotifications(mockNotifications); */

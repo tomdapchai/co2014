@@ -319,3 +319,61 @@ export const getEventRevenue = async (
         console.error("Error getting event revenue:", error);
     }
 };
+
+/* export const getEventsByDate = async (
+    date: string
+): Promise<EventView[] | { error: string }> => {
+    try {
+        console.log("date", `'${date}'`);
+        const [events] = await pool.execute("CALL GetEventsByDay(?)", [date]);
+
+        if ((events as RowDataPacket).length === 0) {
+            return { error: "No events found" };
+        }
+        // Use `map` to handle asynchronous transformations
+        const eventsWithDetails = await Promise.all(
+            (events as RowDataPacket).map(async (event: any) => {
+                const { ID_event, organizer_username } = event;
+
+                // Fetch event data
+                const eventData = await getEventData(ID_event);
+                const { registrations, ID_organizer } = eventData;
+                event.attendees = registrations ? registrations.length : 0;
+
+                // Fetch organizer data
+                const userData = await getUserData(ID_organizer);
+
+                const {
+                    username = "Unknown",
+                    name: userName = "Unknown Organizer",
+                    avatar = "",
+                } = "error" in userData ? {} : userData;
+
+                return {
+                    id: event.ID_event,
+                    title: event.event_name,
+                    logo: event.event_logo,
+                    start: new Date(event.start_date_time)
+                        .toISOString()
+                        .slice(0, 16),
+                    end: new Date(event.end_date_time)
+                        .toISOString()
+                        .slice(0, 16),
+                    location: event.location,
+                    attendees: event.attendees,
+                    byUser: {
+                        id: ID_organizer,
+                        name: userName || username,
+                        avatar,
+                    },
+                };
+            })
+        );
+
+        return eventsWithDetails as EventView[];
+    } catch (error) {
+        console.error("Error getting events by date:", error);
+        return { error: "Error getting events by date" };
+    }
+};
+ */

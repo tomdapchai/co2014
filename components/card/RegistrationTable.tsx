@@ -83,7 +83,8 @@ export default function RegistrationTable({
                                       </Badge>
                                   </TableCell>
                                   <TableCell>
-                                      {registration.status == "accepted" &&
+                                      {(registration.status == "accepted" ||
+                                          !registration.status) &&
                                           (registration.hasChekedIn
                                               ? "Yes"
                                               : "No")}

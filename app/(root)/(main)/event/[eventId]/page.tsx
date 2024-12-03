@@ -329,7 +329,22 @@ const page = ({ params }: { params: { eventId: string } }) => {
                         path,
                         appliedPromo,
                         eventData.byUser
-                    );
+                    ).then((res) => {
+                        if ("error" in res) {
+                            toast({
+                                title: "Error",
+                                description: res.error,
+                                variant: "destructive",
+                            });
+                        } else {
+                            toast({
+                                title: "Success",
+                                description: res.message,
+                                variant: "default",
+                            });
+                            getEvent();
+                        }
+                    });
                 }
             }
         } catch (error) {

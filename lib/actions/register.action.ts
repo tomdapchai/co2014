@@ -76,6 +76,40 @@ export const registerEvent = async (
     }
 
     if (ticketType === "paid") {
+        // count total registered, if exceed maxTicketPerUser, return error
+        const getTotalPaidRegistered = async () => {
+            const paidRegisteredPromises = eventTickets.map(async (ticket) => {
+                try {
+                    const result = await getPaidEventRegistration(
+                        userId,
+                        eventId,
+                        ticket.ticketName
+                    );
+                    return typeof result === "number" ? result : 0; // Ensure only valid numbers are added
+                } catch (error) {
+                    console.error(
+                        `Error fetching registration for ticket ${ticket.ticketName}:`,
+                        error
+                    );
+                    return 0; // Default to 0 on error
+                }
+            });
+
+            const resolvedValues = await Promise.all(paidRegisteredPromises);
+            return resolvedValues.reduce((acc, value) => acc + value, 0);
+        };
+
+        const totalRegistered = await getTotalPaidRegistered();
+        console.log(totalRegistered, maxTicketPerUser);
+
+        const currentRegister = multiType.reduce((acc, ticket) => {
+            return acc + ticket.quantity;
+        }, 0);
+
+        if (totalRegistered + currentRegister > maxTicketPerUser) {
+            return { error: "User has reached maximum ticket registration" };
+        }
+
         // for each eventTicket, run for loop to register
         let totalCost = multiType.reduce((acc, ticket) => {
             return acc + ticket.quantity * ticket.price;
@@ -168,8 +202,7 @@ export const registerEvent = async (
 
         await Promise.all(waitRegister);
     }
-
-    return { message: "wait for implement" };
+    return { message: "Registration successful" };
     // check if user already registered before & count how many registrations by user (to compare with maxTicketsPerUser)
 };
 

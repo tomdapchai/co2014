@@ -6,6 +6,7 @@ import EventCard from "@/components/card/EventCard";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import NoResult from "@/components/NoResult";
+import Link from "next/link";
 import { set } from "date-fns";
 const page = () => {
     const { userId } = useAuth();
